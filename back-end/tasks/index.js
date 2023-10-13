@@ -1,4 +1,7 @@
 exports.accounts = require("./accounts_task")
 exports.accounts = require("./deploy_bookies_task")
+exports.accounts = require("./deploy_test_bookies_task")
 exports.accounts = require("./create_bookie_task")
 exports.accounts = require("./create_tournament_task")
+exports.accounts = require("./get_tournament_info_task")
+exports.accounts = require("./get_bookie_info_task")

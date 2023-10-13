@@ -44,7 +44,8 @@ library BookiesLibrary {
         registryFundingAmount = numUpdates * maxGasPayment;
         registryFundingAmount = registryFundingAmount <= MIN_REGISTRY_FUNDING_AMOUNT ? MIN_REGISTRY_FUNDING_AMOUNT : registryFundingAmount;
 
-        return (registryFundingAmount, totalAPIRequestFee);
+        // return (registryFundingAmount, totalAPIRequestFee); // USE FOR PRODUCTION
+        return (MIN_REGISTRY_FUNDING_AMOUNT*3, totalAPIRequestFee); // USE FOR TESTING
     }
 
     function calculateScore(uint256[] memory bracket, uint256[] memory result) public pure returns(uint256 score)

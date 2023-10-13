@@ -16,7 +16,7 @@ var _registrarAddress;
 
 var _tournamentFactoryString = "TournamentFactory";
 
-async function deployBookies (isTest) {
+async function deployBookies (isTest=false, runChecks=false) {
   if (network.name == "mumbai") {
     _erc677LinkAddress = erc677LinkAddress_mumbai;
     _registrarAddress = _registrarAddress_mumbai;
@@ -30,11 +30,11 @@ async function deployBookies (isTest) {
     _tournamentFactoryString = "TestTournamentFactory"
   }
 
-  console.log("Deploying Bookies Contracts")
+  console.log("DEPLOYING CONTRACTS")
   console.log("Network: " + network.name)
+  console.log("Is Test: " + isTest + "\n")
 
-  const accounts = await ethers.getSigners()
-  const account = accounts[0]
+  const [account] = await ethers.getSigners()
 
   // Add link token address
   contractAddresses[network.name]["chainlinkTokenAddress"] = _erc677LinkAddress;
@@ -52,6 +52,7 @@ async function deployBookies (isTest) {
       BookiesLibrary: bookiesLibrary.address,
     },
   })
+  
   const tournamentFactory = await TournamentFactory.deploy(_erc677LinkAddress, _registrarAddress)
   await tournamentFactory.deployed()
   console.log('TournamentFactory deployed:', tournamentFactory.address)
@@ -76,20 +77,22 @@ async function deployBookies (isTest) {
     }
   });
 
-  // Testing Functions
-  console.log("\nTesting Factories\n")
+  if (runChecks) {
+    // Testing Functions
+    console.log("\nTESTING FACTORIES\n")
 
-  // Create tournament
-  const tournamentAddress = await create_tournament(isTest, tournamentFactory.address, bookiesLibrary.address)
-  console.log("Tournament Address: " + tournamentAddress  + "\n")
+    // Create tournament
+    const tournamentAddress = await create_tournament(isTest, tournamentFactory.address, bookiesLibrary.address)
+    console.log("Tournament Address: " + tournamentAddress  + "\n")
 
-  // Create bookie
-  const bookieAddress = await create_bookie(tournamentAddress, tournamentFactory.address, bookieFactory.address, bookiesLibrary.address)
-  console.log("Bookie Address: " + bookieAddress)
+    // Create bookie
+    const bookieAddress = await create_bookie(tournamentAddress, tournamentFactory.address, bookieFactory.address, bookiesLibrary.address)
+    console.log("Bookie Address: " + bookieAddress)
+  }
 }
 
 if (require.main === module) {
-  deployBookies(false)
+  deployBookies(false, false)
     .then(() => process.exit(0))
     .catch(error => {
       console.error(error)

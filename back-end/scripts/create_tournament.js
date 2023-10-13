@@ -33,12 +33,14 @@ async function createTournament (isTest=false, tournamentFactoryAddress="", book
     bookiesLibraryAddress = bookiesLibraryAddress || _goerliBookiesLibraryAddress
   }
 
+  console.log("Network: " + network.name)
+
   if (isTest) {
     tournamentFactoryString = "TestTournamentFactory"
   }
 
   // Create tournament
-  console.log('Create Tournament')
+  console.log('CREATING TOURNAMENT')
 
   const tournamentFactory = await ethers.getContractAt(tournamentFactoryString, tournamentFactoryAddress)
 
