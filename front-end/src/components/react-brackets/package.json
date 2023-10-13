@@ -1,0 +1,113 @@
+{
+  "_from": "react-brackets",
+  "_id": "react-brackets@0.4.7",
+  "_inBundle": false,
+  "_integrity": "sha512-5NynHxC32gEe9vuLQJvD2JEtHXg2gI0R6MWVD+uSYhQCAlEdwlKbFWNdrP5MIt1buyxrs2F/tr1EIW6+eBCocw==",
+  "_location": "/react-brackets",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "react-brackets",
+    "name": "react-brackets",
+    "escapedName": "react-brackets",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-brackets/-/react-brackets-0.4.7.tgz",
+  "_shasum": "adfeac06632fc9129cecb74b337bcd9328c8e0e3",
+  "_spec": "react-brackets",
+  "_where": "D:\\Users\\imant\\Documents\\Projects\\Bookies\\front-end",
+  "author": {
+    "name": "mohux"
+  },
+  "bugs": {
+    "url": "https://github.com/mohux/react-brackets/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "react-swipeable-views": "^0.13.9",
+    "styled-components": "^5.1.1"
+  },
+  "deprecated": false,
+  "description": "React component to render dynamic bracket UI",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.0.4",
+    "@testing-library/user-event": "^12.1.4",
+    "@types/jest": "^26.0.13",
+    "@types/node": "^12.12.38",
+    "@types/react": "^16.9.27",
+    "@types/react-dom": "^16.9.7",
+    "@types/react-swipeable-views": "^0.13.0",
+    "@types/styled-components": "^5.1.2",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "babel-eslint": "^10.0.3",
+    "cross-env": "^7.0.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-config-standard-react": "^9.2.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "gh-pages": "^2.2.0",
+    "microbundle-crl": "^0.13.10",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "^3.4.1",
+    "typescript": "^3.7.5"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/mohux/react-brackets#readme",
+  "keywords": [
+    "react",
+    "brackets",
+    "react-brackets",
+    "tournaments",
+    "react-tournaments"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.modern.js",
+  "name": "react-brackets",
+  "peerDependencies": {
+    "react": "^17.0.0",
+    "react-swipeable-views": "^0.13.9",
+    "styled-components": "^5.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohux/react-brackets.git"
+  },
+  "scripts": {
+    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "deploy": "gh-pages -d example/build",
+    "predeploy": "cd example && yarn install && yarn run build",
+    "prepare": "run-s build",
+    "start": "microbundle-crl watch --no-compress --format modern,cjs",
+    "test": "run-s test:unit test:lint test:build",
+    "test:build": "run-s build",
+    "test:lint": "eslint './src/**/*.{ts,tsx}'",
+    "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
+    "test:watch": "react-scripts test --env=jsdom"
+  },
+  "source": "src/index.tsx",
+  "version": "0.4.7"
+}

@@ -1,0 +1,770 @@
+{
+    "tournamentABI": [
+      {
+        "inputs": [],
+        "name": "cancelTournament",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getTournamentInfo",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "startDate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "endDate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "hasStarted",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "hasEnded",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "isCanceled",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "updateInterval",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastTimeStamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string[]",
+                "name": "teamNames",
+                "type": "string[]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "teamCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "gameDays",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "gameCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "result",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sportsId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "upkeep",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct TournamentInfo",
+            "name": "tournamentInfo",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getTournamentResult",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "",
+            "type": "uint256[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "withdrawLink",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "withdrawUpkeepFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+      ],
+    "bookieABI": [
+      {
+        "inputs": [],
+        "name": "cancelBookie",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "cancelBracket",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "collectPayout",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "bracket",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "createBracket",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getBookieInfo",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "pool",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "buyInPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "hasStarted",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "hasEnded",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "isCanceled",
+                "type": "bool"
+              },
+              {
+                "internalType": "address",
+                "name": "tournament",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "upkeep",
+                "type": "address"
+              },
+              {
+                "internalType": "address[]",
+                "name": "bracketOwners",
+                "type": "address[]"
+              },
+              {
+                "internalType": "address[]",
+                "name": "winners",
+                "type": "address[]"
+              }
+            ],
+            "internalType": "struct BookieInfo",
+            "name": "bookieInfo",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "addr",
+            "type": "address"
+          }
+        ],
+        "name": "getBracket",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "",
+            "type": "uint256[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "withdrawUpkeepFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+      ],
+    "chainlinkTokenABI": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            }
+          ],
+          "name": "allowance",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "remaining",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "decimals",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "decimalPlaces",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "addedValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "decreaseApproval",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "subtractedValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "increaseApproval",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "name",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "tokenName",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "symbol",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "tokenSymbol",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "totalSupply",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "totalTokensIssued",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "transferAndCall",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+    "tournamentFactoryABI": [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "NewTournament",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "updateInterval",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "gameDays",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gameCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "teamCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startDate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endDate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "jobId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "sportsId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "apiRequestFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gasLimit",
+              "type": "uint256"
+            }
+          ],
+          "name": "createTournament",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "getTournaments",
+          "outputs": [
+            {
+              "internalType": "address[]",
+              "name": "",
+              "type": "address[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+    "bookieFactoryABI": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "NewBookie",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyInPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "contract ITournament",
+            "name": "tournament",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gasLimit",
+            "type": "uint256"
+          }
+        ],
+        "name": "createBookie",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getBookies",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "",
+            "type": "address[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+      ],
+    "bookiesLibraryABI": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timespan",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "interval",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "numGameDays",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "apiRequestFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxGasPayment",
+            "type": "uint256"
+          }
+        ],
+        "name": "calculateLinkPayment",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "registryFundingAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalAPIRequestFee",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "bracket",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "result",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "calculateScore",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "score",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "a",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "b",
+            "type": "string"
+          }
+        ],
+        "name": "compareStrings",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+      ],
+      "chainlinkTokenAddress": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+      "bookiesLibraryAddress": "0x5F35306C8db806e3286660e7BaCd19a3B833B86f",
+      "tournamentFactoryAddress": "0x5C781bA201c83083580691f9332444007EAE86E5",
+      "bookieFactoryAddress": "0xbb693AF0d1B36d36468F5B1FA937211Db39b20d7"
+}

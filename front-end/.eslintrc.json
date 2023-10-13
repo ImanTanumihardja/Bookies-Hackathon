@@ -1,0 +1,7 @@
+{
+  "extends": "@moralisweb3",
+  "ignorePatterns": ["front-end\src\components\react-brackets*.js" ],
+  "rules": {
+    "no-console": "off"
+  }
+}
