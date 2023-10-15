@@ -1,28 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.16;
 
 import "./ITournament.sol";
 import "./Tournament.sol";
 import "./BookiesLibrary.sol";
 
 contract TournamentFactory {
-    // address internal registry; // = 0x9806cf6fBc89aBF286e8140C42174B94836e36F2; //Goerli testnet 
-    // address public erc677LinkAddress = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB; //Goerli testnet (LINK addresses: https://docs.chain.link/docs/link-token-contracts/)
-
     event NewTournament(address);
-
-    /*
-    register(
-        string memory name,
-        bytes calldata encryptedEmail,
-        address upkeepContract,
-        uint32 gasLimit,
-        address adminAddress,
-        bytes calldata checkData,
-        uint96 amount,
-        uint8 source
-    )
-    */
 
     bytes4 private constant FUNC_SELECTOR = bytes4(keccak256("register(string,bytes,address,uint32,address,bytes,uint96,uint8,address)"));
     uint8 private constant SOURCE = 110;
@@ -39,16 +23,14 @@ contract TournamentFactory {
         i_registry = IRegistry(registryAddress);
     }
 
-    function createTournament(string calldata name, uint updateInterval, uint256[] calldata gameDays, uint256 gameCount, uint256 teamCount, uint256 startDate, uint256 endDate, address oracle, bytes32 jobId, uint256 sportsId, uint256 apiRequestFee, uint256 gasLimit) external
+    function createTournament(string calldata name, string[] calldata teamNames, uint256 numRounds, uint256 startDate, uint256 endDate, address oracleAddress, uint256 gasLimit) external
     {
-        (uint registryFundingAmount, uint totalAPIRequestFee) = BookiesLibrary.calculateLinkPayment(endDate - startDate, updateInterval, gameDays.length, apiRequestFee, i_registry.getMaxPaymentForGas(gasLimit));
+        uint registryFundingAmount = BookiesLibrary.calculateLinkPayment(i_registry.getMaxPaymentForGas(gasLimit));
 
-        require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount + totalAPIRequestFee), "Usage: Could not transfer link");
+        require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        TournamentInfo memory tournamentInfo = TournamentInfo(name, msg.sender, startDate, endDate, false, false, false, updateInterval, 0 , new string[](0), teamCount, gameDays, gameCount, new uint256[](0), sportsId, address(i_registry), address(this), false, 0); 
-        Tournament tournament = new Tournament(tournamentInfo, address(i_link), oracle, jobId, apiRequestFee);
-
-        i_link.transfer(address(tournament), totalAPIRequestFee);
+        TournamentInfo memory tournamentInfo = TournamentInfo(name, startDate, endDate, false, false, false, false, new uint256[](teamNames.length), new Round[](numRounds), teamNames, numRounds, 0, msg.sender, address(this), address(i_registry), oracleAddress); 
+        Tournament tournament = new Tournament(tournamentInfo);
 
         // Setup chainlink upkeep
         (State memory state, Config memory _c, address[] memory _k) = i_registry

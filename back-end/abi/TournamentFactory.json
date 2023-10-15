@@ -36,23 +36,13 @@
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "updateInterval",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "gameDays",
-        "type": "uint256[]"
+        "internalType": "string[]",
+        "name": "teamNames",
+        "type": "string[]"
       },
       {
         "internalType": "uint256",
-        "name": "gameCount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "teamCount",
+        "name": "numRounds",
         "type": "uint256"
       },
       {
@@ -67,23 +57,8 @@
       },
       {
         "internalType": "address",
-        "name": "oracle",
+        "name": "oracleAddress",
         "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "jobId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "sportsId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "apiRequestFee",
-        "type": "uint256"
       },
       {
         "internalType": "uint256",

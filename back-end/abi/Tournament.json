@@ -9,11 +9,6 @@
             "type": "string"
           },
           {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
             "name": "startDate",
             "type": "uint256"
@@ -35,18 +30,67 @@
           },
           {
             "internalType": "bool",
+            "name": "hasSettled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
             "name": "isCanceled",
             "type": "bool"
           },
           {
-            "internalType": "uint256",
-            "name": "updateInterval",
-            "type": "uint256"
+            "internalType": "uint256[]",
+            "name": "result",
+            "type": "uint256[]"
           },
           {
-            "internalType": "uint256",
-            "name": "lastTimeStamp",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "roundNumber",
+                "type": "uint256"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "homeTeam",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "awayTeam",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "winner",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "assertionId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct Game[]",
+                "name": "games",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "isAsserted",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "isSettled",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct Round[]",
+            "name": "rounds",
+            "type": "tuple[]"
           },
           {
             "internalType": "string[]",
@@ -55,32 +99,17 @@
           },
           {
             "internalType": "uint256",
-            "name": "teamCount",
+            "name": "numRounds",
             "type": "uint256"
           },
           {
-            "internalType": "uint256[]",
-            "name": "gameDays",
-            "type": "uint256[]"
-          },
-          {
             "internalType": "uint256",
-            "name": "gameCount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "result",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "sportsId",
+            "name": "upkeepId",
             "type": "uint256"
           },
           {
             "internalType": "address",
-            "name": "registry",
+            "name": "owner",
             "type": "address"
           },
           {
@@ -89,82 +118,23 @@
             "type": "address"
           },
           {
-            "internalType": "bool",
-            "name": "isInitialized",
-            "type": "bool"
+            "internalType": "address",
+            "name": "registryAddress",
+            "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "upkeepId",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "oracleAddress",
+            "type": "address"
           }
         ],
         "internalType": "struct TournamentInfo",
         "name": "tournamentInfo",
         "type": "tuple"
-      },
-      {
-        "internalType": "address",
-        "name": "linkAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "oracle",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "jobId_",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "payment_",
-        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "ChainlinkCancelled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "ChainlinkFulfilled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "ChainlinkRequested",
-    "type": "event"
   },
   {
     "inputs": [],
@@ -211,42 +181,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "_requestId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "_games",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "fulfillCreate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "_requestId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "_games",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "fulfillResolve",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getTournamentInfo",
     "outputs": [
@@ -256,11 +190,6 @@
             "internalType": "string",
             "name": "name",
             "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
           },
           {
             "internalType": "uint256",
@@ -284,18 +213,67 @@
           },
           {
             "internalType": "bool",
+            "name": "hasSettled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
             "name": "isCanceled",
             "type": "bool"
           },
           {
-            "internalType": "uint256",
-            "name": "updateInterval",
-            "type": "uint256"
+            "internalType": "uint256[]",
+            "name": "result",
+            "type": "uint256[]"
           },
           {
-            "internalType": "uint256",
-            "name": "lastTimeStamp",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "roundNumber",
+                "type": "uint256"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "homeTeam",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "awayTeam",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "winner",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "assertionId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct Game[]",
+                "name": "games",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "isAsserted",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "isSettled",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct Round[]",
+            "name": "rounds",
+            "type": "tuple[]"
           },
           {
             "internalType": "string[]",
@@ -304,32 +282,17 @@
           },
           {
             "internalType": "uint256",
-            "name": "teamCount",
+            "name": "numRounds",
             "type": "uint256"
           },
           {
-            "internalType": "uint256[]",
-            "name": "gameDays",
-            "type": "uint256[]"
-          },
-          {
             "internalType": "uint256",
-            "name": "gameCount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "result",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "sportsId",
+            "name": "upkeepId",
             "type": "uint256"
           },
           {
             "internalType": "address",
-            "name": "registry",
+            "name": "owner",
             "type": "address"
           },
           {
@@ -338,18 +301,18 @@
             "type": "address"
           },
           {
-            "internalType": "bool",
-            "name": "isInitialized",
-            "type": "bool"
+            "internalType": "address",
+            "name": "registryAddress",
+            "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "upkeepId",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "oracleAddress",
+            "type": "address"
           }
         ],
         "internalType": "struct TournamentInfo",
-        "name": "tournamentInfo",
+        "name": "",
         "type": "tuple"
       }
     ],
@@ -386,18 +349,11 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "upkeepId_",
+        "name": "upkeepId",
         "type": "uint256"
       }
     ],
     "name": "setUpkeepId",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdrawLink",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

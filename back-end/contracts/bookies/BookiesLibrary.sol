@@ -33,19 +33,27 @@ library BookiesLibrary {
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
 
-    function calculateLinkPayment(uint256 timespan, uint256 updateInterval, uint numGameDays, uint256 apiRequestFee, uint256 maxGasPayment) public pure returns(uint registryFundingAmount, uint totalAPIRequestFee) {
-        uint256 MIN_REGISTRY_FUNDING_AMOUNT = 5000000000000000000; // 5 link
-        uint8  NUM_REQUEST_PER_UPKEEP = 2;
-        
-        uint256 numUpdates = timespan <= updateInterval ? 2 : timespan / updateInterval + 1; // you need minimum 2 updates for start: one for initialization and and the other for start and end
+    function getIndexOfString(string[] calldata array, string calldata value) pure public returns (uint256)
+    {
+        for (uint i = 0; i < array.length; i++) {
+            if (compareStrings(value, array[i])) {
+                return i;
+            }
+        }
+        return array.length;
+    }
 
-        totalAPIRequestFee = ((numUpdates * NUM_REQUEST_PER_UPKEEP * numGameDays) + numGameDays) * apiRequestFee; // for each update you have to make two api request for create and resolve for each game day and for intialization you have to get a create for every gameday
+    // TODO
+    function calculateLinkPayment(uint256 maxGasPayment) public pure returns(uint registryFundingAmount) {
+        uint256 MIN_REGISTRY_FUNDING_AMOUNT = 15000000000000000000; // 5 link
+        
+        uint256 numUpdates = 8; //TODO: Calculate number of updates based on how many rounds
 
         registryFundingAmount = numUpdates * maxGasPayment;
         registryFundingAmount = registryFundingAmount <= MIN_REGISTRY_FUNDING_AMOUNT ? MIN_REGISTRY_FUNDING_AMOUNT : registryFundingAmount;
 
         // return (registryFundingAmount, totalAPIRequestFee); // USE FOR PRODUCTION
-        return (MIN_REGISTRY_FUNDING_AMOUNT*3, totalAPIRequestFee); // USE FOR TESTING
+        return (MIN_REGISTRY_FUNDING_AMOUNT); // USE FOR TESTING
     }
 
     function calculateScore(uint256[] memory bracket, uint256[] memory result) public pure returns(uint256 score)

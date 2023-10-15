@@ -16,7 +16,7 @@ const _registrarAddress_mumbai = "0xDb8e8e2ccb5C033938736aa89Fe4fa1eDfD15a1d";
 
 
 async function createTournament (isTest=false, tournamentFactoryAddress="", bookiesLibraryAddress="") {
-  const { TournamentInfo } = require("./tournamentInfoTest")
+  const { TournamentInfo } = require("./tournamentInfo")
   var registrarAddress, erc677LinkAddress, tournamentFactoryAddress, bookiesLibraryAddress;
   var tournamentFactoryString = "TournamentFactory";
 
@@ -53,24 +53,16 @@ async function createTournament (isTest=false, tournamentFactoryAddress="", book
   const maxPaymentForGas = await registry.getMaxPaymentForGas(TournamentInfo.gasLimit)
 
   // Approve link transfer
-  const [registryFundingAmount, totalAPIRequestFee] = await bookiesLibrary.calculateLinkPayment(TournamentInfo.endDate - TournamentInfo.startDate, TournamentInfo.updateInterval, 0, 0, maxPaymentForGas)
-  await (await chainlinkToken.approve(tournamentFactory.address, registryFundingAmount.add(totalAPIRequestFee))).wait()
-  console.log("Total Chainlink Approval: " + registryFundingAmount.add(totalAPIRequestFee))
+  const registryFundingAmount = await bookiesLibrary.calculateLinkPayment(maxPaymentForGas)
+  await (await chainlinkToken.approve(tournamentFactory.address, registryFundingAmount)).wait()
+  console.log("Total Chainlink Approval: " + registryFundingAmount)
 
-  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.name, TournamentInfo.updateInterval, TournamentInfo.gameDays, TournamentInfo.gameCount, TournamentInfo.teamCount, TournamentInfo.startDate, TournamentInfo.endDate, TournamentInfo.oracle, TournamentInfo.jobId, TournamentInfo.sportsId, TournamentInfo.apiRequestFee, TournamentInfo.gasLimit)
+  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate, TournamentInfo.endDate, TournamentInfo.oracleAddress, TournamentInfo.gasLimit)
   await createTournamentTransaction.wait();
 
   const tournaments = await tournamentFactory.getTournaments();
   const tournament = await ethers.getContractAt('Tournament', tournaments[tournaments.length - 1])
-  var tournamentInfo = await tournament.getTournamentInfo()
 
-  // Wait for tournament to initialize
-  while (!tournamentInfo.isInitialized) {
-    await sleep(50000);
-    tournamentInfo = await tournament.getTournamentInfo()
-  }
-
-  console.log("Tournament Initialized")
   console.log("Created Tournament: " + (await tournament.getTournamentInfo()))
   return tournament.address
 }
@@ -82,10 +74,6 @@ if (require.main === module) {
       process.exit(1)
     })
 
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 module.exports = createTournament

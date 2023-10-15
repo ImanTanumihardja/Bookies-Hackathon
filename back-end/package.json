@@ -24,6 +24,7 @@
   "dependencies": {
     "@alch/alchemy-web3": "^1.4.7",
     "@chainlink/contracts": "^0.5.1",
+    "@uma/core": "^2.56.1",
     "alchemy-sdk": "^2.9.0",
     "hardhat-abi-exporter": "^2.10.1"
   }
