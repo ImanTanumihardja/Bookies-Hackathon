@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import"./ITournament.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./BookiesLibrary.sol";
-import "@uma/core/contracts/optimistic-oracle-v3/interfaces/OptimisticOracleV3Interface.sol";
+import "./OptimisticOracleV3Interface.sol";
 import './DataAsserter.sol';
 
 contract Tournament is ITournament, KeeperCompatibleInterface 
@@ -40,7 +40,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     Round[] private rounds; // List of rounds in tournament
     TournamentInfo private tournamentInfo_;
 
-    uint256 private constant ASSERTION_WAIT_TIME = 120;
+    uint64 private assertionLiveness = 30;
 
     constructor(TournamentInfo memory tournamentInfo)
     {
@@ -53,6 +53,8 @@ contract Tournament is ITournament, KeeperCompatibleInterface
 
         registry_ = IRegistry(tournamentInfo_.registryAddress);
         oo_ = OptimisticOracleV3Interface(tournamentInfo_.oracleAddress);
+
+        // assertionLiveness = oo_.defaultLiveness();
 
         // Initialize results
         for (uint i = 0; i < tournamentInfo_.teamNames.length; i++) {
@@ -141,7 +143,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             upkeepNeeded = true;
         }
 
-        if (hasEnded && (time - lastAssertTime_ >= ASSERTION_WAIT_TIME) && !tournamentInfo_.hasSettled) {
+        if (hasEnded && (time - lastAssertTime_ >= assertionLiveness) && !tournamentInfo_.hasSettled) {
             assertionSettled = true;
             upkeepNeeded = true;
         }
@@ -226,7 +228,17 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                 for (uint j = 0; j < round.games.length; j++) {
                     Game storage game = round.games[j];
                     bytes memory assertedClaim = (abi.encodePacked(game.homeTeam, ' beat ', game.awayTeam, ' in the ', tournamentInfo_.name));
-                    game.assertionId = oo_.assertTruthWithDefaults(assertedClaim, address(this)); // Call Optimistic Oracle to assert claim
+                    game.assertionId = oo_.assertTruth(
+                                                    assertedClaim,
+                                                    address(this), // asserter
+                                                    address(0), // callbackRecipient
+                                                    address(0), // escalationManager
+                                                    assertionLiveness,
+                                                    oo_.defaultCurrency(),
+                                                    oo_.getMinimumBond(address(oo_.defaultCurrency())),
+                                                    oo_.defaultIdentifier(),
+                                                    bytes32(0)
+                                                ); // Call Optimistic Oracle to assert claim
                 }
                 rounds[i].isAsserted = true;
                 lastAssertTime_ = block.timestamp;
