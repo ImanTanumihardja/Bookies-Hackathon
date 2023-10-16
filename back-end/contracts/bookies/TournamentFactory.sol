@@ -29,7 +29,7 @@ contract TournamentFactory {
 
         require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        TournamentInfo memory tournamentInfo = TournamentInfo(name, startDate, endDate, false, false, false, false, new uint256[](teamNames.length), new Round[](numRounds), teamNames, numRounds, 0, msg.sender, address(this), address(i_registry), oracleAddress); 
+        TournamentInfo memory tournamentInfo = TournamentInfo(name, startDate, endDate, false, false, false, false, new uint256[](teamNames.length), teamNames, numRounds, 0, msg.sender, address(this), address(i_registry), oracleAddress); 
         Tournament tournament = new Tournament(tournamentInfo);
 
         // Setup chainlink upkeep

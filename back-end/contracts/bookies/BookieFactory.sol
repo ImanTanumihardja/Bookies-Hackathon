@@ -6,24 +6,7 @@ import "./Bookie.sol";
 import "./BookiesLibrary.sol";
 
 contract BookieFactory {
-
-    // IRegistry private registry; // 0x9806cf6fBc89aBF286e8140C42174B94836e36F2; //Goerli testnet 
-    // address public erc677LinkAddress = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB; //Goerli testnet (LINK addresses: https://docs.chain.link/docs/link-token-contracts/)
-
     event NewBookie(address);
-
-    /*
-    register(
-        string memory name,
-        bytes calldata encryptedEmail,
-        address upkeepContract,
-        uint32 gasLimit,
-        address adminAddress,
-        bytes calldata checkData,
-        uint96 amount,
-        uint8 source
-    )
-    */
 
     bytes4 private constant FUNC_SELECTOR = bytes4(keccak256("register(string,bytes,address,uint32,address,bytes,uint96,uint8,address)"));
     uint8 private constant SOURCE = 110;
@@ -42,12 +25,11 @@ contract BookieFactory {
 
     function createBookie(string memory name, uint256 buyInPrice, ITournament tournament, uint256 gasLimit) external
     {
-        TournamentInfo memory tournamentInfo = tournament.getTournamentInfo();  
-        (uint registryFundingAmount, ) = BookiesLibrary.calculateLinkPayment(tournamentInfo.endDate - tournamentInfo.startDate, tournamentInfo.updateInterval, 0, 0, i_registry.getMaxPaymentForGas(gasLimit));
+        uint registryFundingAmount= BookiesLibrary.calculateLinkPayment(i_registry.getMaxPaymentForGas(gasLimit));
 
         require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        BookieInfo memory bookieInfo = BookieInfo(name, msg.sender, 0, buyInPrice, false, false, false, address(tournament), address(i_registry), new address[](0), new address[](0), address(this), false, 0);
+        BookieInfo memory bookieInfo = BookieInfo(name, buyInPrice, 0, false, false, false, new address[](0), new address[](0), new address[](0), 0, address(tournament), 0, 0, 0, address(i_registry), msg.sender, address(this));
         Bookie bookie = new Bookie(bookieInfo);
 
         // Setup chainlink upkeep

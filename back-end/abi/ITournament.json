@@ -53,55 +53,6 @@
             "type": "uint256[]"
           },
           {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "roundNumber",
-                "type": "uint256"
-              },
-              {
-                "components": [
-                  {
-                    "internalType": "string",
-                    "name": "homeTeam",
-                    "type": "string"
-                  },
-                  {
-                    "internalType": "string",
-                    "name": "awayTeam",
-                    "type": "string"
-                  },
-                  {
-                    "internalType": "string",
-                    "name": "winner",
-                    "type": "string"
-                  },
-                  {
-                    "internalType": "bytes32",
-                    "name": "assertionId",
-                    "type": "bytes32"
-                  }
-                ],
-                "internalType": "struct Game[]",
-                "name": "games",
-                "type": "tuple[]"
-              },
-              {
-                "internalType": "bool",
-                "name": "isAsserted",
-                "type": "bool"
-              },
-              {
-                "internalType": "bool",
-                "name": "isSettled",
-                "type": "bool"
-              }
-            ],
-            "internalType": "struct Round[]",
-            "name": "rounds",
-            "type": "tuple[]"
-          },
-          {
             "internalType": "string[]",
             "name": "teamNames",
             "type": "string[]"

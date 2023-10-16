@@ -5,6 +5,7 @@ import"./ITournament.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./BookiesLibrary.sol";
 import "@uma/core/contracts/optimistic-oracle-v3/interfaces/OptimisticOracleV3Interface.sol";
+import './DataAsserter.sol';
 
 contract Tournament is ITournament, KeeperCompatibleInterface 
 {
@@ -28,17 +29,18 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     using BookiesLibrary for string;
 
     /*  Public Variables    */
-    uint public counter; // Testing
+    // uint public counter; // Testing
+    // uint private updateInterval = 60; // Use an updateInterval in seconds and a timestamp to slow execution of Upkeep
+    // uint private lastTimeStamp = 0;
 
     /*  Private Variables    */
-    IRegistry private registry;
-    OptimisticOracleV3Interface private optimisticOracle;
+    IRegistry private registry_;
+    OptimisticOracleV3Interface private oo_;
+    uint private lastAssertTime_; // Time of last assertion
+    Round[] private rounds; // List of rounds in tournament
     TournamentInfo private tournamentInfo_;
-    uint private updateInterval = 60; // Use an updateInterval in seconds and a timestamp to slow execution of Upkeep
-    uint private lastTimeStamp = 0;
-    uint private lastAssertTime; 
 
-    uint256 private constant ASSERTION_WAIT_TIME = 30;
+    uint256 private constant ASSERTION_WAIT_TIME = 120;
 
     constructor(TournamentInfo memory tournamentInfo)
     {
@@ -49,19 +51,20 @@ contract Tournament is ITournament, KeeperCompatibleInterface
 
         tournamentInfo_ = tournamentInfo;
 
-        registry = IRegistry(tournamentInfo_.registryAddress);
-        optimisticOracle = OptimisticOracleV3Interface(tournamentInfo_.oracleAddress);
+        registry_ = IRegistry(tournamentInfo_.registryAddress);
+        oo_ = OptimisticOracleV3Interface(tournamentInfo_.oracleAddress);
 
         // Initialize results
         for (uint i = 0; i < tournamentInfo_.teamNames.length; i++) {
             tournamentInfo_.result[i] = 0;
         }
 
+        rounds = new Round[](tournamentInfo_.numRounds);
         // Create rounds
         uint256 teamCount = tournamentInfo_.teamNames.length;
         for (uint i = 0; i < tournamentInfo_.numRounds; i++) {
-            tournamentInfo_.rounds[i].roundNumber = i;
-            Game[] storage games = tournamentInfo_.rounds[i].games;
+            rounds[i].roundNumber = i;
+            Game[] storage games = rounds[i].games;
             if (i == 0) {
                 for (uint j = 0; j < teamCount; j++) {
                     if (j % 2 == 0) {
@@ -96,7 +99,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
         tournamentInfo_.hasStarted = true;
         tournamentInfo_.hasEnded = true;
 
-        registry.cancelUpkeep(tournamentInfo_.upkeepId);
+        registry_.cancelUpkeep(tournamentInfo_.upkeepId);
     }
 
     function getTournamentResult() view external override returns(uint256[] memory)
@@ -112,7 +115,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     {
         require(tournamentInfo_.upkeepId != 0 && (tournamentInfo_.hasEnded || tournamentInfo_.isCanceled), "Usage: Cannot withdraw upkeep funds");
 
-        registry.withdrawFunds(tournamentInfo_.upkeepId, tournamentInfo_.owner);
+        registry_.withdrawFunds(tournamentInfo_.upkeepId, tournamentInfo_.owner);
     }
 
     /*   Chainlink  */
@@ -138,15 +141,15 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             upkeepNeeded = true;
         }
 
-        if (hasEnded && (time - lastAssertTime >= ASSERTION_WAIT_TIME)) {
+        if (hasEnded && (time - lastAssertTime_ >= ASSERTION_WAIT_TIME) && !tournamentInfo_.hasSettled) {
             assertionSettled = true;
             upkeepNeeded = true;
         }
 
-        // Testing
-        if ((time - lastTimeStamp) > updateInterval) {
-            upkeepNeeded = true;
-        }
+        // // Testing
+        // if ((time - lastTimeStamp) > updateInterval) {
+        //     upkeepNeeded = true;
+        // }
         
         performData = abi.encode(time, hasStarted, hasEnded, assertionSettled);
         return (upkeepNeeded, performData);
@@ -175,17 +178,17 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             tournamentInfo_.hasStarted = true;
         }
 
-        // Testing
-        if ((time - lastTimeStamp) > updateInterval) {
-            lastTimeStamp = time;
-            counter = counter + 1;
-        }
+        // // Testing
+        // if ((time - lastTimeStamp) > updateInterval) {
+        //     lastTimeStamp = time;
+        //     counter = counter + 1;
+        // }
     }
 
     // Assert the truth against the Optimistic Asserter.
     function settleTournament() internal {
         for (uint i = 0; i < tournamentInfo_.numRounds; i++) {
-            Round storage round = tournamentInfo_.rounds[i];
+            Round storage round = rounds[i];
             if (round.isSettled) {
                 // Continue to the next round since this one is already settled
                 continue;
@@ -194,7 +197,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                 // Check for settlement
                 for (uint j = 0; j < round.games.length; j++) {
                     Game storage game = round.games[j];
-                    bool result = true; // optimisticOracle.settleAndGetAssertionResult(game.assertionId);
+                    bool result = oo_.settleAndGetAssertionResult(game.assertionId); // Call Optimistic Oracle to settle and get results
                     game.winner = result ? game.homeTeam : game.awayTeam;
                     tournamentInfo_.result[BookiesLibrary.getIndexOfString(tournamentInfo_.teamNames, game.winner)] += 1;
                 }
@@ -204,17 +207,17 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                     for (uint j = 0; j < round.games.length; j++) {
                         Game storage game = round.games[j];
                         if (j % 2 == 0) {
-                            tournamentInfo_.rounds[i+1].games[j/2].homeTeam = game.winner;
+                            rounds[i+1].games[j/2].homeTeam = game.winner;
                         }
                         else {
-                            tournamentInfo_.rounds[i+1].games[j/2].awayTeam = game.winner;
+                            rounds[i+1].games[j/2].awayTeam = game.winner;
                         }
                     }
                 }
                 else {
                     tournamentInfo_.hasSettled = true;
                 }
-                tournamentInfo_.rounds[i].isSettled = true;
+                rounds[i].isSettled = true;
 
                 continue;
             }
@@ -223,10 +226,10 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                 for (uint j = 0; j < round.games.length; j++) {
                     Game storage game = round.games[j];
                     bytes memory assertedClaim = (abi.encodePacked(game.homeTeam, ' beat ', game.awayTeam, ' in the ', tournamentInfo_.name));
-                    game.assertionId = optimisticOracle.assertTruthWithDefaults(assertedClaim, address(this));
+                    game.assertionId = oo_.assertTruthWithDefaults(assertedClaim, address(this)); // Call Optimistic Oracle to assert claim
                 }
-                tournamentInfo_.rounds[i].isAsserted = true;
-                lastAssertTime = block.timestamp;
+                rounds[i].isAsserted = true;
+                lastAssertTime_ = block.timestamp;
                 break;
             }
         }

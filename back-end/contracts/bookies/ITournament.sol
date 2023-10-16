@@ -24,7 +24,6 @@ struct TournamentInfo {
     bool hasSettled;
     bool isCanceled;
     uint256[] result; // List of number of games each team won
-    Round[] rounds; // List of rounds in tournament
     string[] teamNames; // Adjacent teams are paired together for a game
     uint256 numRounds;
     uint256 upkeepId;
