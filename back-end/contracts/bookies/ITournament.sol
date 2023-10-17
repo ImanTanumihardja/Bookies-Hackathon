@@ -31,6 +31,8 @@ struct TournamentInfo {
     address factory;
     address registryAddress;
     address oracleAddress;
+    address collateralToken;
+    uint256 optimisticOracleProposerBond;
 }
 
 interface ITournament {

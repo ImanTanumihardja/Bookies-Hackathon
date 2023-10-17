@@ -5,7 +5,15 @@ import"./ITournament.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./BookiesLibrary.sol";
 import "./OptimisticOracleV3Interface.sol";
-import './DataAsserter.sol';
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "@uma/core/contracts/common/implementation/ExpandedERC20.sol";
+import "@uma/core/contracts/common/implementation/Testable.sol";
+import "@uma/core/contracts/common/implementation/AddressWhitelist.sol";
+import "@uma/core/contracts/oracle/implementation/Constants.sol";
+
+import "@uma/core/contracts/oracle/interfaces/OptimisticOracleV2Interface.sol";
+import "@uma/core/contracts/oracle/interfaces/IdentifierWhitelistInterface.sol";
 
 contract Tournament is ITournament, KeeperCompatibleInterface 
 {
@@ -38,9 +46,13 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     OptimisticOracleV3Interface private oo_;
     uint private lastAssertTime_; // Time of last assertion
     Round[] private rounds; // List of rounds in tournament
+    mapping(bytes32 => Game) private games_; // Mapping of assertionId to game
     TournamentInfo private tournamentInfo_;
 
-    uint64 private assertionLiveness = 30;
+    bytes32 public priceIdentifier = "YES_OR_NO_QUERY";
+    uint64 private livenessTime = 30;
+    uint256 private optimisticOracleProposerBond = 500e18;
+    uint256 public proposerReward = 10e18;
 
     constructor(TournamentInfo memory tournamentInfo)
     {
@@ -81,8 +93,43 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                     }
                 }
             }
+
+            // Submit a new request to the Optimistic Oracle
+
             teamCount = teamCount / 2;
         }
+    }
+
+    /**
+     * @notice Callback function called by the optimistic oracle when a price requested by this contract is settled.
+     * @param identifier price identifier being requested.
+     * @param timestamp timestamp of the price being requested.
+     * @param ancillaryData ancillary data of the price being requested.
+     * @param price price that was resolved by the escalation process.
+     */
+    function priceSettled(
+        bytes32 identifier,
+        uint256 timestamp,
+        bytes memory ancillaryData,
+        int256 price
+    ) external {
+        // OptimisticOracleV2Interface optimisticOracle = getOptimisticOracle();
+        // require(msg.sender == address(optimisticOracle), "not authorized");
+
+        // require(identifier == priceIdentifier, "same identifier");
+        // require(keccak256(ancillaryData) == keccak256(customAncillaryData), "same ancillary data");
+
+        // // We only want to process the price if it is for the current price request.
+        // if (timestamp != requestTimestamp) return;
+
+        // // Calculate the value of settlementPrice using either 0, 0.5e18, or 1e18 as the expiryPrice.
+        // if (price >= 1e18) {
+        //     settlementPrice = 1e18;
+        // } else if (price == 5e17) {
+        //     settlementPrice = 5e17;
+        // } else {
+        //     settlementPrice = 0;
+        // }
     }
 
     function setUpkeepId(uint256 upkeepId) external onlyFactory {
@@ -143,7 +190,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             upkeepNeeded = true;
         }
 
-        if (hasEnded && (time - lastAssertTime_ >= assertionLiveness) && !tournamentInfo_.hasSettled) {
+        if (hasEnded && (time - lastAssertTime_ >= livenessTime) && !tournamentInfo_.hasSettled) {
             assertionSettled = true;
             upkeepNeeded = true;
         }
@@ -233,7 +280,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                                                     address(this), // asserter
                                                     address(0), // callbackRecipient
                                                     address(0), // escalationManager
-                                                    assertionLiveness,
+                                                    livenessTime,
                                                     oo_.defaultCurrency(),
                                                     oo_.getMinimumBond(address(oo_.defaultCurrency())),
                                                     oo_.defaultIdentifier(),
@@ -246,4 +293,44 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             }
         }
     }
+
+    /**
+     * @notice Request a price in the optimistic oracle for a given request timestamp and ancillary data combo. Set the bonds
+     * accordingly to the deployer's parameters. Will revert if re-requesting for a previously requested combo.
+     */
+    function requestOracleData(bytes claim) internal {
+        requestTimestamp = getCurrentTime(); // Set the request timestamp to the current block timestamp.
+
+        OptimisticOracleV2Interface optimisticOracle = getOptimisticOracle();
+
+        collateralToken.safeApprove(address(optimisticOracle), proposerReward);
+
+        optimisticOracle.requestPrice(
+            priceIdentifier,
+            requestTimestamp,
+            claim,
+            tournamentInfo_.collateralToken,
+            proposerReward
+        );
+
+        // Set the Optimistic oracle liveness for the price request.
+        optimisticOracle.setCustomLiveness(
+            priceIdentifier,
+            requestTimestamp,
+            claim,
+            livenessTime
+        );
+
+        // Set the Optimistic oracle proposer bond for the price request.
+        optimisticOracle.setBond(priceIdentifier, requestTimestamp, claim, optimisticOracleProposerBond);
+
+        // Make the request an event-based request.
+        optimisticOracle.setEventBased(priceIdentifier, requestTimestamp, claim);
+
+        // Enable the priceDisputed and priceSettled callback
+        optimisticOracle.setCallbacks(priceIdentifier, requestTimestamp, claim, false, false, true);
+
+        priceRequested = true;
+    }
+
 }
