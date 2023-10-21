@@ -1,6 +1,6 @@
 module.exports = {
    BookieInfo: {
     name: "Test Bookie",
-    gasLimit: 500000
+    gasLimit: 1000000
   }
 }

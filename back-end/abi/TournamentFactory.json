@@ -57,7 +57,12 @@
       },
       {
         "internalType": "address",
-        "name": "oracleAddress",
+        "name": "oracleFinderAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralTokenAddress",
         "type": "address"
       },
       {

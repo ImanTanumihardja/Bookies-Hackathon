@@ -23,13 +23,13 @@ contract TournamentFactory {
         i_registry = IRegistry(registryAddress);
     }
 
-    function createTournament(string calldata name, string[] calldata teamNames, uint256 numRounds, uint256 startDate, uint256 endDate, address oracleAddress, uint256 gasLimit) external
+    function createTournament(string calldata name, string[] calldata teamNames, uint256 numRounds, uint256 startDate, uint256 endDate, address oracleFinderAddress, address collateralTokenAddress, uint256 gasLimit) external
     {
         uint registryFundingAmount = BookiesLibrary.calculateLinkPayment(i_registry.getMaxPaymentForGas(gasLimit));
 
         require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        TournamentInfo memory tournamentInfo = TournamentInfo(name, startDate, endDate, false, false, false, false, new uint256[](teamNames.length), teamNames, numRounds, 0, msg.sender, address(this), address(i_registry), oracleAddress, address(0)); 
+        TournamentInfo memory tournamentInfo = TournamentInfo(name, startDate, endDate, false, false, false, false, new uint256[](teamNames.length), teamNames, numRounds, teamNames.length-1, 0, msg.sender, address(this), address(i_registry), oracleFinderAddress, collateralTokenAddress, 0); 
         Tournament tournament = new Tournament(tournamentInfo);
 
         // Setup chainlink upkeep

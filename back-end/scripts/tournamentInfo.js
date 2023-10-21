@@ -1,11 +1,12 @@
 module.exports = {
    TournamentInfo: {
-    name: "Test Tournament",
+    name: "2022 World Cup",
     startDate: Math.trunc(Date.now() / 1000) + 60 * 2,
     endDate: Math.trunc(Date.now() / 1000) + 60 * 3,
-    oracleAddress: "0x263351499f82C107e540B01F0Ca959843e22464a",
+    oracleAddress: "0xA5B9d8a0B0Fa04Ba71BDD68069661ED5C0848884",
+    collateralCurrencyAddress : "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
     teamName: ["Netherlands", "USA", "Argentina", "Australia", "England", "Sengal", "France", "Poland"],
     numRounds: 3,
-    gasLimit: 500000
+    gasLimit: 1000000
   }
 }

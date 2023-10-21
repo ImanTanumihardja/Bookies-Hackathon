@@ -71,9 +71,6 @@ contract Bookie is IBookie, KeeperCompatibleInterface
     }
 
      /*  Public variables    */
-    // uint public counter; // Testing
-    // uint lastTimeStamp; // Testing
-    // uint updateInterval = 60; // Use an updateInterval in seconds and a timestamp to slow execution of Upkeep
 
     /*  Private Variables    */
     IRegistry private registry_;
@@ -99,7 +96,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
 
         bookieInfo_.buyInPrice *= 1 wei;
         bookieInfo_.teamCount = tournamentInfo.teamNames.length;
-        bookieInfo_.gameCount = tournamentInfo.teamNames.length - 1;
+        bookieInfo_.gameCount = tournamentInfo.numGames;
         registry_ = IRegistry(bookieInfo_.registryAddress);
     }
 
@@ -265,19 +262,14 @@ contract Bookie is IBookie, KeeperCompatibleInterface
             hasEnded = true;
             upkeepNeeded = true;
         }
-
-        // // Testing
-        // if ((time - lastTimeStamp) > updateInterval) { //&& hasStarted && !hasEnded) {
-        //     upkeepNeeded = true;
-        // }
         
-        performData = abi.encode(time, winners, hasStarted, hasEnded, isCanceled);
+        performData = abi.encode(winners, hasStarted, hasEnded, isCanceled);
         return (upkeepNeeded, performData);
     }
 
     function performUpkeep(bytes calldata performData) external override 
     {
-        (uint time, address[] memory winners, bool hasStarted, bool hasEnded, bool isCanceled) = abi.decode(performData, (uint, address[], bool, bool, bool));
+        (address[] memory winners, bool hasStarted, bool hasEnded, bool isCanceled) = abi.decode(performData, (address[], bool, bool, bool));
         
         if (isCanceled && !bookieInfo_.isCanceled) {
             cancelBookieInternal();
@@ -302,11 +294,5 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         if (hasStarted && !isCanceled) {
             bookieInfo_.hasStarted = true;
         }
-
-        // // Testing
-        // if ((time - lastTimeStamp) > updateInterval) {
-        //     lastTimeStamp = block.timestamp;
-        //     counter = counter + 1;
-        // }
     }
 }

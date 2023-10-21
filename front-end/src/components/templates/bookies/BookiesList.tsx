@@ -86,7 +86,7 @@ const BookiesList: FC = () => {
             <Accordion allowMultiple defaultIndex={[]} className="border-transparent">
                 {[...bookiesListState.bookies.entries()].map(
                 (bookieInfo, index: number) =>
-                  <BookiesListItem {...{bookieInfo, index}}/>
+                  <BookiesListItem {...{bookieInfo, index}} key={index}/>
                 )}
             </Accordion>)}
         </BorderContainer>

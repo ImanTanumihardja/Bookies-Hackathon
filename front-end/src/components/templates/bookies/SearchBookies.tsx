@@ -70,7 +70,7 @@ const SearchBookies: FC = (props) => {
 
       // Get tournament info
       const tournamentInfo: any = await readContract({
-        address: bookieInfo.tournament,
+        address: bookieInfo.tournamentAddress,
         abi: tournamentABI,
         functionName: 'getTournamentInfo',
       });

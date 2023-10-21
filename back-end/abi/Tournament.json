@@ -55,6 +55,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "numGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "upkeepId",
             "type": "uint256"
           },
@@ -77,6 +82,16 @@
             "internalType": "address",
             "name": "oracleAddress",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralCurrency",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "proposerBond",
+            "type": "uint256"
           }
         ],
         "internalType": "struct TournamentInfo",
@@ -113,6 +128,53 @@
         "internalType": "bytes",
         "name": "performData",
         "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRounds",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "roundNumber",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "homeTeam",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "awayTeam",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "winner",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assertionId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct Game[]",
+            "name": "games",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct Round[]",
+        "name": "",
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -176,6 +238,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "numGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "upkeepId",
             "type": "uint256"
           },
@@ -198,6 +265,16 @@
             "internalType": "address",
             "name": "oracleAddress",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralCurrency",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "proposerBond",
+            "type": "uint256"
           }
         ],
         "internalType": "struct TournamentInfo",
@@ -230,6 +307,34 @@
       }
     ],
     "name": "performUpkeep",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "identifier",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ancillaryData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "int256",
+        "name": "price",
+        "type": "int256"
+      }
+    ],
+    "name": "priceSettled",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

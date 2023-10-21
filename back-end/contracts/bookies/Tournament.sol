@@ -4,16 +4,8 @@ pragma solidity ^0.8.16;
 import"./ITournament.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./BookiesLibrary.sol";
-import "./OptimisticOracleV3Interface.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import "@uma/core/contracts/common/implementation/ExpandedERC20.sol";
-import "@uma/core/contracts/common/implementation/Testable.sol";
-import "@uma/core/contracts/common/implementation/AddressWhitelist.sol";
-import "@uma/core/contracts/oracle/implementation/Constants.sol";
-
-import "@uma/core/contracts/oracle/interfaces/OptimisticOracleV2Interface.sol";
-import "@uma/core/contracts/oracle/interfaces/IdentifierWhitelistInterface.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@uma/core/contracts/optimistic-oracle-v2/interfaces/OptimisticOracleV2Interface.sol";
 
 contract Tournament is ITournament, KeeperCompatibleInterface 
 {
@@ -37,22 +29,18 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     using BookiesLibrary for string;
 
     /*  Public Variables    */
-    // uint public counter; // Testing
-    // uint private updateInterval = 60; // Use an updateInterval in seconds and a timestamp to slow execution of Upkeep
-    // uint private lastTimeStamp = 0;
+
 
     /*  Private Variables    */
     IRegistry private registry_;
-    OptimisticOracleV3Interface private oo_;
     uint private lastAssertTime_; // Time of last assertion
     Round[] private rounds; // List of rounds in tournament
-    mapping(bytes32 => Game) private games_; // Mapping of assertionId to game
+    mapping(bytes32 => GameRequestInfo) private gameIndexes_; // Mapping of assertionId to game
     TournamentInfo private tournamentInfo_;
-
-    bytes32 public priceIdentifier = "YES_OR_NO_QUERY";
-    uint64 private livenessTime = 30;
-    uint256 private optimisticOracleProposerBond = 500e18;
-    uint256 public proposerReward = 10e18;
+    OptimisticOracleV2Interface private oo_;
+    bytes32 private priceIdentifier = "NUMERICAL";
+    uint64 private livenessTime = 10;
+    uint256 private proposerReward = 0;
 
     constructor(TournamentInfo memory tournamentInfo)
     {
@@ -64,9 +52,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
         tournamentInfo_ = tournamentInfo;
 
         registry_ = IRegistry(tournamentInfo_.registryAddress);
-        oo_ = OptimisticOracleV3Interface(tournamentInfo_.oracleAddress);
-
-        // assertionLiveness = oo_.defaultLiveness();
+        oo_ = OptimisticOracleV2Interface(tournamentInfo_.oracleAddress);
 
         // Initialize results
         for (uint i = 0; i < tournamentInfo_.teamNames.length; i++) {
@@ -82,7 +68,15 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             if (i == 0) {
                 for (uint j = 0; j < teamCount; j++) {
                     if (j % 2 == 0) {
-                        games.push(Game(tournamentInfo_.teamNames[j], tournamentInfo_.teamNames[j+1], "", 0));
+                        Game memory game = Game(tournamentInfo_.teamNames[j], tournamentInfo_.teamNames[j+1], "", 0);
+
+                        // Submit a new request to the Optimistic Oracle
+                        bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '\", ', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5' ));
+                        bytes32 assertionID = requestOracleData(assertedClaim);
+                        game.assertionId = assertionID;
+                        gameIndexes_[assertionID] = GameRequestInfo(i, j/2);
+
+                        games.push(game);
                     }
                 }
             }
@@ -93,8 +87,6 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                     }
                 }
             }
-
-            // Submit a new request to the Optimistic Oracle
 
             teamCount = teamCount / 2;
         }
@@ -113,23 +105,66 @@ contract Tournament is ITournament, KeeperCompatibleInterface
         bytes memory ancillaryData,
         int256 price
     ) external {
-        // OptimisticOracleV2Interface optimisticOracle = getOptimisticOracle();
-        // require(msg.sender == address(optimisticOracle), "not authorized");
+        require(msg.sender == address(oo_), "not authorized");
 
-        // require(identifier == priceIdentifier, "same identifier");
-        // require(keccak256(ancillaryData) == keccak256(customAncillaryData), "same ancillary data");
+        bytes32 assertionId = keccak256(abi.encodePacked(identifier, timestamp, ancillaryData, tournamentInfo_.collateralCurrency, proposerReward, livenessTime));
 
-        // // We only want to process the price if it is for the current price request.
-        // if (timestamp != requestTimestamp) return;
+        uint256 roundNumber = gameIndexes_[assertionId].roundNumber;
+        uint256 gameIndex = gameIndexes_[assertionId].gameIndex;
 
-        // // Calculate the value of settlementPrice using either 0, 0.5e18, or 1e18 as the expiryPrice.
-        // if (price >= 1e18) {
-        //     settlementPrice = 1e18;
-        // } else if (price == 5e17) {
-        //     settlementPrice = 5e17;
-        // } else {
-        //     settlementPrice = 0;
-        // }
+        Round storage round = rounds[roundNumber];
+        Game storage game = round.games[gameIndex];
+
+        require(game.assertionId != 0, "Usage: AssertionID does not exist");
+
+        if (price >= 1e18) {
+            game.winner = game.homeTeam;
+        } 
+        else if (price == 0) {
+            game.winner = game.awayTeam;
+        } 
+        else{
+            // Unresolvable assert again
+            game.winner = 'unresolvable';
+
+            // Submit a request to the Optimistic Oracle again
+            bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '\", ', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5' ));
+            bytes32 newAssertionId = requestOracleData(assertedClaim);
+            game.assertionId = newAssertionId;
+            gameIndexes_[newAssertionId] = gameIndexes_[assertionId];
+            return;
+        }
+
+        tournamentInfo_.result[BookiesLibrary.getIndexOfString(tournamentInfo_.teamNames, game.winner)] += 1;
+
+        // Setup next rond
+        if (roundNumber < tournamentInfo_.numRounds - 1) {
+            Game storage nextRoundGame = rounds[roundNumber+1].games[gameIndex/2];
+            if (nextRoundGame.assertionId == 0) {
+                if (gameIndex % 2 == 0) {
+                    nextRoundGame.homeTeam = game.winner;
+                }
+                else {
+                    nextRoundGame.awayTeam = game.winner;
+                }
+
+                // Check if ready to assert next game
+                if (!nextRoundGame.homeTeam.compareStrings("") && !nextRoundGame.awayTeam.compareStrings("") && nextRoundGame.assertionId == 0){
+                    // Submit a new request to the Optimistic Oracle
+                    bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', nextRoundGame.homeTeam, ' vs ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name, '\", ', nextRoundGame.homeTeam, ':1 ', nextRoundGame.awayTeam, ':0, tie:0.5, unresolvable:-1' ));
+                    bytes32 nextAssertionID = requestOracleData(assertedClaim);
+                    nextRoundGame.assertionId = nextAssertionID;
+                    gameIndexes_[nextAssertionID] = GameRequestInfo(roundNumber+1, gameIndex/2);
+                }
+            }   
+        }
+        else { // No more round tournament has settled
+            tournamentInfo_.hasSettled = true;
+        }
+    }
+
+    function getRounds() view external returns(Round[] memory) {
+        return rounds;
     }
 
     function setUpkeepId(uint256 upkeepId) external onlyFactory {
@@ -173,7 +208,6 @@ contract Tournament is ITournament, KeeperCompatibleInterface
         uint time = block.timestamp;
         bool hasStarted = tournamentInfo_.hasStarted;
         bool hasEnded = tournamentInfo_.hasEnded;
-        bool assertionSettled = false;
 
         if (tournamentInfo_.isCanceled) {
             performData = abi.encode(time, hasStarted, hasEnded);
@@ -189,18 +223,8 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             hasEnded = true;
             upkeepNeeded = true;
         }
-
-        if (hasEnded && (time - lastAssertTime_ >= livenessTime) && !tournamentInfo_.hasSettled) {
-            assertionSettled = true;
-            upkeepNeeded = true;
-        }
-
-        // // Testing
-        // if ((time - lastTimeStamp) > updateInterval) {
-        //     upkeepNeeded = true;
-        // }
         
-        performData = abi.encode(time, hasStarted, hasEnded, assertionSettled);
+        performData = abi.encode(hasStarted, hasEnded);
         return (upkeepNeeded, performData);
     }
 
@@ -210,87 +234,14 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             return;
         }
 
-        (uint time, bool hasStarted, bool hasEnded, bool assertionSettled) = abi.decode(performData, (uint, bool, bool, bool));
+        (bool hasStarted, bool hasEnded) = abi.decode(performData, (bool, bool));
 
         if (hasEnded && !tournamentInfo_.hasEnded) {
             tournamentInfo_.hasEnded = true;
-            // Assert truths for the first round
-            settleTournament();
-        }
-
-        if (hasEnded && assertionSettled && !tournamentInfo_.hasSettled) {
-            // Settle the current tournament round
-            settleTournament();
         }
 
         if (hasStarted && !tournamentInfo_.hasStarted) {
             tournamentInfo_.hasStarted = true;
-        }
-
-        // // Testing
-        // if ((time - lastTimeStamp) > updateInterval) {
-        //     lastTimeStamp = time;
-        //     counter = counter + 1;
-        // }
-    }
-
-    // Assert the truth against the Optimistic Asserter.
-    function settleTournament() internal {
-        for (uint i = 0; i < tournamentInfo_.numRounds; i++) {
-            Round storage round = rounds[i];
-            if (round.isSettled) {
-                // Continue to the next round since this one is already settled
-                continue;
-            }
-            else if (round.isAsserted) {
-                // Check for settlement
-                for (uint j = 0; j < round.games.length; j++) {
-                    Game storage game = round.games[j];
-                    bool result = oo_.settleAndGetAssertionResult(game.assertionId); // Call Optimistic Oracle to settle and get results
-                    game.winner = result ? game.homeTeam : game.awayTeam;
-                    tournamentInfo_.result[BookiesLibrary.getIndexOfString(tournamentInfo_.teamNames, game.winner)] += 1;
-                }
-
-                // Populate the next round with games
-                if (i < tournamentInfo_.numRounds - 1) {
-                    for (uint j = 0; j < round.games.length; j++) {
-                        Game storage game = round.games[j];
-                        if (j % 2 == 0) {
-                            rounds[i+1].games[j/2].homeTeam = game.winner;
-                        }
-                        else {
-                            rounds[i+1].games[j/2].awayTeam = game.winner;
-                        }
-                    }
-                }
-                else {
-                    tournamentInfo_.hasSettled = true;
-                }
-                rounds[i].isSettled = true;
-
-                continue;
-            }
-            else {
-                // Assert truths for round
-                for (uint j = 0; j < round.games.length; j++) {
-                    Game storage game = round.games[j];
-                    bytes memory assertedClaim = (abi.encodePacked(game.homeTeam, ' beat ', game.awayTeam, ' in the ', tournamentInfo_.name));
-                    game.assertionId = oo_.assertTruth(
-                                                    assertedClaim,
-                                                    address(this), // asserter
-                                                    address(0), // callbackRecipient
-                                                    address(0), // escalationManager
-                                                    livenessTime,
-                                                    oo_.defaultCurrency(),
-                                                    oo_.getMinimumBond(address(oo_.defaultCurrency())),
-                                                    oo_.defaultIdentifier(),
-                                                    bytes32(0)
-                                                ); // Call Optimistic Oracle to assert claim
-                }
-                rounds[i].isAsserted = true;
-                lastAssertTime_ = block.timestamp;
-                break;
-            }
         }
     }
 
@@ -298,39 +249,38 @@ contract Tournament is ITournament, KeeperCompatibleInterface
      * @notice Request a price in the optimistic oracle for a given request timestamp and ancillary data combo. Set the bonds
      * accordingly to the deployer's parameters. Will revert if re-requesting for a previously requested combo.
      */
-    function requestOracleData(bytes claim) internal {
-        requestTimestamp = getCurrentTime(); // Set the request timestamp to the current block timestamp.
+    function requestOracleData(bytes memory assertedClaim) internal returns (bytes32) {
+        uint256 requestTimestamp = block.timestamp; // Set the request timestamp to the current block timestamp.
 
-        OptimisticOracleV2Interface optimisticOracle = getOptimisticOracle();
+        IERC20(tournamentInfo_.collateralCurrency).approve(address(oo_), proposerReward);
 
-        collateralToken.safeApprove(address(optimisticOracle), proposerReward);
-
-        optimisticOracle.requestPrice(
+        oo_.requestPrice(
             priceIdentifier,
             requestTimestamp,
-            claim,
-            tournamentInfo_.collateralToken,
+            assertedClaim,
+            IERC20(tournamentInfo_.collateralCurrency),
             proposerReward
         );
 
         // Set the Optimistic oracle liveness for the price request.
-        optimisticOracle.setCustomLiveness(
+        uint256 customLiveness = tournamentInfo_.endDate - requestTimestamp > 0 ? tournamentInfo_.endDate - requestTimestamp + livenessTime : livenessTime;
+        oo_.setCustomLiveness(
             priceIdentifier,
             requestTimestamp,
-            claim,
-            livenessTime
+            assertedClaim,
+            customLiveness
         );
 
         // Set the Optimistic oracle proposer bond for the price request.
-        optimisticOracle.setBond(priceIdentifier, requestTimestamp, claim, optimisticOracleProposerBond);
+        oo_.setBond(priceIdentifier, requestTimestamp, assertedClaim, tournamentInfo_.proposerBond);
 
         // Make the request an event-based request.
-        optimisticOracle.setEventBased(priceIdentifier, requestTimestamp, claim);
+        oo_.setEventBased(priceIdentifier, requestTimestamp, assertedClaim);
 
-        // Enable the priceDisputed and priceSettled callback
-        optimisticOracle.setCallbacks(priceIdentifier, requestTimestamp, claim, false, false, true);
+        // Enable the priceSettled callback
+        oo_.setCallbacks(priceIdentifier, requestTimestamp, assertedClaim, false, false, true);
 
-        priceRequested = true;
+        return keccak256(abi.encodePacked(priceIdentifier, requestTimestamp, assertedClaim, tournamentInfo_.collateralCurrency, proposerReward, livenessTime));
     }
 
 }

@@ -43,13 +43,17 @@ async function getTournamentInfo (tournamentAddress="", tournamentFactoryAddress
     const tournamentAddresses = await tournamentFactory.getTournaments();
     for (const ta of tournamentAddresses) {
       tournament = await ethers.getContractAt('Tournament', ta)
-      console.log(await tournament.getTournamentInfo())
     }
   } 
   else {
     tournament = await ethers.getContractAt('Tournament', tournamentAddress)
-    console.log(await tournament.getTournamentInfo())
   }
+  console.log(await tournament.getTournamentInfo())
+  rounds = await tournament.getRounds()
+  for (round of rounds) {
+    console.log(round)
+    console.log(round[1])
+  } 
 }
 
 if (require.main === module) {

@@ -8,11 +8,14 @@ struct Game {
     bytes32 assertionId;
 }
 
+struct GameRequestInfo{
+    uint256 roundNumber;
+    uint256 gameIndex;
+}
+
 struct Round {
     uint256 roundNumber;
     Game[] games;
-    bool isAsserted;
-    bool isSettled;
 }
 
 struct TournamentInfo {
@@ -26,13 +29,14 @@ struct TournamentInfo {
     uint256[] result; // List of number of games each team won
     string[] teamNames; // Adjacent teams are paired together for a game
     uint256 numRounds;
+    uint256 numGames;
     uint256 upkeepId;
     address  owner;
     address factory;
     address registryAddress;
     address oracleAddress;
-    address collateralToken;
-    uint256 optimisticOracleProposerBond;
+    address collateralCurrency;
+    uint256 proposerBond;
 }
 
 interface ITournament {
@@ -40,6 +44,8 @@ interface ITournament {
     function getTournamentInfo() view external returns(TournamentInfo memory);
 
     function getTournamentResult() view external returns(uint256[] memory);
+    
+    function getRounds() view external returns(Round[] memory);
 
     function cancelTournament() external;
 

@@ -57,7 +57,7 @@ async function createTournament (isTest=false, tournamentFactoryAddress="", book
   await (await chainlinkToken.approve(tournamentFactory.address, registryFundingAmount)).wait()
   console.log("Total Chainlink Approval: " + registryFundingAmount)
 
-  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate, TournamentInfo.endDate, TournamentInfo.oracleAddress, TournamentInfo.gasLimit)
+  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate, TournamentInfo.endDate, TournamentInfo.oracleAddress, TournamentInfo.collateralCurrencyAddress, TournamentInfo.gasLimit)
   await createTournamentTransaction.wait();
 
   const tournaments = await tournamentFactory.getTournaments();

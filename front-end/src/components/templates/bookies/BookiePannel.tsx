@@ -96,7 +96,7 @@ const Bookie: FC<IBookiePannel> = (props: IBookiePannel) => {
       </Box>
       <div>
         <h1 className="font-display font-bold text-2xl">Details</h1>
-        <Text className="mb-2"><b>Tournament Address: </b>{bookieState.bookieInfo.tournament.toString()}</Text>
+        <Text className="mb-2"><b>Tournament Address: </b>{bookieState.bookieInfo.tournamentAddress.toString()}</Text>
 
         <div className="flex gap-4 items-center text-center">
           <div className="bg-zinc-900 w-fit rounded-lg p-2">
@@ -104,9 +104,6 @@ const Bookie: FC<IBookiePannel> = (props: IBookiePannel) => {
           </div>
           <div className="bg-zinc-900 w-fit rounded-lg p-2">
             <span><b>Pool Size: </b>{ethers.utils.formatEther(bookieState.bookieInfo.pool)} ETH</span>
-          </div>
-          <div className="bg-zinc-900 p-2 rounded-lg w-fit">
-            <b>Sport: </b> {sportsId[bookieState.tournamentInfo.sportsId]}
           </div>
           {bookieState.bookieInfo.isCanceled ? (<div className="bg-red-900 px-6 p-2 rounded-lg w-fit font-bold">Canceled</div>)
             : bookieState.bookieInfo.hasStarted && !bookieState.bookieInfo.hasEnded ? (<div className="bg-yellow-900 px-6 p-2 rounded-lg w-fit font-bold">In Progress</div>) 
