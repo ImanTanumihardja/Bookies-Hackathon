@@ -924,7 +924,7 @@
     ]
     ,
     "chainlinkTokenAddress": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-    "bookiesLibraryAddress": "0x87A7BfB435A288b7633544375E55E5c4BCA7E021",
-    "tournamentFactoryAddress": "0x3ce224c147120608635fD73613a3bD805415BfB0",
-    "bookieFactoryAddress": "0xF682d7AcbE3f533a458fAa61Bbb28F0d962F99C4"
+        "bookiesLibraryAddress": "0x63C6FABe470CF2a5bE4a4E9975aD749ad4dC1f4f",
+        "tournamentFactoryAddress": "0x2c1940FCa13a6739D6Dc8aCE2c6b3023351B983C",
+        "bookieFactoryAddress": "0x210041f46cfC067cccf25Db4c3057ed5963eCb0F"
 }

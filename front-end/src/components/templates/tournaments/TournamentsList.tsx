@@ -122,9 +122,6 @@ const TournamentsList: FC<ITournaments> = (props: ITournaments) => {
                             <div className="bg-zinc-900 p-2 rounded-lg w-fit">
                               <b>End Date:</b> {new Date(tournament[1].startDate?.toNumber() * 1000).toLocaleDateString()}
                             </div>
-                            <div className="bg-zinc-900 p-2 rounded-lg w-fit">
-                              <b>Sport:</b> {sportsId[tournament[1].sportsId]}
-                            </div>
                             {tournament[1].isCanceled ? (<div className="bg-red-900 px-6 p-2 rounded-lg w-fit">Canceled</div>)
                               : tournament[1].hasStarted && !tournament[1].hasEnded ? (<div className="bg-yellow-900 px-6 p-2 rounded-lg w-fit">In Progress</div>) 
                               : !tournament[1].hasStarted && !tournament[1].hasEnded ? (<div className="bg-green-900 px-6 p-2 rounded-lg w-fit">Not Yet Started</div>) 

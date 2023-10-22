@@ -48,16 +48,12 @@ const CreateBookie: FC = () => {
         functionName: 'getTournamentInfo',
       });
 
-      const [registryFundingAmount, totalAPIRequestFee]: any = await readContract({
+      const registryFundingAmount: any = await readContract({
         address: bookiesLibraryAddress,
         abi: bookiesLibraryABI,
         functionName: 'calculateLinkPayment',
         args: [
-          tournamentInfo.endDate - tournamentInfo.startDate,
-          tournamentInfo.updateInterval,
-          tournamentInfo.gameCount,
-          0,
-          createBookieState.gasLimit,
+          createBookieState.gasLimit
         ],
       });
 
@@ -65,7 +61,7 @@ const CreateBookie: FC = () => {
         address: chainlinkTokenAddress,
         abi: chainlinkTokenABI,
         functionName: 'approve',
-        args: [bookieFactoryAddress, registryFundingAmount + totalAPIRequestFee],
+        args: [bookieFactoryAddress, registryFundingAmount],
       });
 
       const approveTx = await writeContract(approveConfig);

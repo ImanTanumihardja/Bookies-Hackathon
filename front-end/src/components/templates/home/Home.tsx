@@ -70,10 +70,16 @@ const Home = () => {
           <h1 className="text-5xl font-display font-bold">Power of Bookies.</h1>
         </div>
         <p className=" bg-white/10 rounded-md text-lg opacity-90 p-4 mt-4">
-          Current betting tools can be risky due to the required trust in third-parties.
-          Bookies primarily serves as a decentralized, non-custodial sports betting exchange built on top of Optimism.
-          We uses Smart Contracts to ensure the money exchanged in bets is always secure. We also leverage Chainlink Oracles and Keepers 
-          to connect smart contract with information from real sporting results and to automate smart contracts to ensure they are continuously up to date.
+        While the online sports betting industry is growing at a rapid rate, there are glaring flaws that need addressing. 
+        Online betting sites like Stake.com, DraftKings, and FanDuel are popular choices among sports enthusiasts and 
+        gamblers due to their user-friendly interfaces and wide range of betting options. However, these sites have to act
+        as a trusted escrow for funds, ensuring that customer deposits and winnings are held securely and processed. While 
+        these sites seem trustworthy, recent examples such as FTX highlight the problem with centralizing your trust in a 
+        third party: “not your keys, not your coins”. Additionally, users are at the whim of these online sites when it comes 
+        to settlement. These websites retain the authority to make the decision in situations where there is ambiguity 
+        regarding the outcome of an event. Users are also constrained by the specific betting odds provided exclusively by 
+        these platforms, which are designed to favor the house. There is currently no product on the market that addresses these 
+        concerns, which is precisely what Bookies aims to accomplish.
         </p>
       </div>
 

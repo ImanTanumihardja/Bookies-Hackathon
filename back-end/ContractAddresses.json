@@ -1,1 +1,14 @@
-{"mumbai":{"chainlinkTokenAddress":"0x326C977E6efc84E512bB9C30f76E30c160eD06FB","bookiesLibraryAddress":"0x74C35CFF5D23D42F73Dab572D547eb9B56b03988","tournamentFactoryAddress":"0x30E17A6bCF383C9F0a16E540bDF1e4C0A5DD5C25","bookieFactoryAddress":"0xbb693AF0d1B36d36468F5B1FA937211Db39b20d7"},"goerli":{"chainlinkTokenAddress":"0x326C977E6efc84E512bB9C30f76E30c160eD06FB","bookiesLibraryAddress":"0xe3204e65822D1EA61f511511F32b2C11998b6e53","tournamentFactoryAddress":"0x80dF236F3E3ed0a4bf2d76162df4763642FCc80E","bookieFactoryAddress":"0xb2ff291fE09b104134eDa94851E58D9757CfFC42"}}
+{
+    "mumbai": {
+        "chainlinkTokenAddress": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+        "bookiesLibraryAddress": "0x74C35CFF5D23D42F73Dab572D547eb9B56b03988",
+        "tournamentFactoryAddress": "0x30E17A6bCF383C9F0a16E540bDF1e4C0A5DD5C25",
+        "bookieFactoryAddress": "0xbb693AF0d1B36d36468F5B1FA937211Db39b20d7"
+    },
+    "goerli": {
+        "chainlinkTokenAddress": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+        "bookiesLibraryAddress": "0x63C6FABe470CF2a5bE4a4E9975aD749ad4dC1f4f",
+        "tournamentFactoryAddress": "0x2c1940FCa13a6739D6Dc8aCE2c6b3023351B983C",
+        "bookieFactoryAddress": "0x210041f46cfC067cccf25Db4c3057ed5963eCb0F"
+    }
+}
