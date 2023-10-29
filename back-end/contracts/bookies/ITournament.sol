@@ -5,7 +5,7 @@ struct Game {
     string homeTeam;
     string awayTeam;
     string winner;
-    bytes32 assertionId;
+    bytes32 requestId;
 }
 
 struct GameRequestInfo{
@@ -19,11 +19,9 @@ struct Round {
 }
 
 struct TournamentInfo {
+    uint256 eventId;
     string name;
     uint256 startDate;
-    uint256 endDate;
-    bool hasStarted;
-    bool hasEnded;
     bool hasSettled;
     bool isCanceled;
     uint256[] result; // List of number of games each team won
@@ -31,11 +29,10 @@ struct TournamentInfo {
     uint256 numRounds;
     uint256 numGames;
     uint256 upkeepId;
-    address  owner;
+    address owner;
     address factory;
+    address requestFactoryAddress;
     address registryAddress;
-    address oracleAddress;
-    address collateralCurrency;
     uint256 proposerBond;
 }
 
@@ -50,5 +47,7 @@ interface ITournament {
     function cancelTournament() external;
 
     function withdrawUpkeepFunds() external;
+
+    function requestSettled(bytes32 identifier, uint256 timestamp, bytes memory ancillaryData,int256 price) external;
 }
 

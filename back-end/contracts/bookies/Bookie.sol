@@ -88,13 +88,14 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         tournament_ = ITournament(bookieInfo.tournamentAddress);
         TournamentInfo memory tournamentInfo = ITournament(bookieInfo.tournamentAddress).getTournamentInfo();
 
-        require(!tournamentInfo.hasEnded, "Usage: Tournament has ended ");
-        require(!tournamentInfo.hasStarted, "Usage: Tournament has started already");
+        require(!tournamentInfo.hasSettled, "Usage: Tournament has settled");
+        require(tournamentInfo.startDate < block.timestamp, "Usage: Tournament has started already");
         require(!tournamentInfo.isCanceled, "Usage: Tournament is canceled");
 
         bookieInfo_ = bookieInfo;
 
         bookieInfo_.buyInPrice *= 1 wei;
+        bookieInfo_.startDate = tournamentInfo.startDate;
         bookieInfo_.teamCount = tournamentInfo.teamNames.length;
         bookieInfo_.gameCount = tournamentInfo.numGames;
         registry_ = IRegistry(bookieInfo_.registryAddress);
@@ -217,13 +218,13 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         }
 
         // Check if tournament started
-        if (!hasStarted && tournamentInfo.hasStarted) {
+        if (!hasStarted && time >= bookieInfo_.startDate) {
             hasStarted = true;
             upkeepNeeded = true;
         }
 
         // Check if tournament ended
-        if (!hasEnded && tournamentInfo.hasEnded && tournamentInfo.hasSettled) {
+        if (!hasEnded && tournamentInfo.hasSettled) {
             if (bookieInfo_.bracketOwners.length > 0) {
                 uint256 maxScore = 0;
                 uint256 count = 0;

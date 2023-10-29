@@ -58,17 +58,17 @@ async function deployBookies (isTest=false, runChecks=false) {
   console.log('TournamentFactory deployed:', tournamentFactory.address)
   contractAddresses[network.name]["tournamentFactoryAddress"] = tournamentFactory.address;
 
-  // // Create bookie factory
-  // const BookieFactory = await ethers.getContractFactory('BookieFactory', {
-  //   signer: account,
-  //   libraries: {
-  //     BookiesLibrary: bookiesLibrary.address,
-  //   },
-  // })
-  // const bookieFactory = await BookieFactory.deploy(_erc677LinkAddress, _registrarAddress)
-  // await bookieFactory.deployed()
-  // console.log('BookieFactory deployed:', bookieFactory.address)
-  // contractAddresses[network.name]["bookieFactoryAddress"] = bookieFactory.address;
+  // Create bookie factory
+  const BookieFactory = await ethers.getContractFactory('BookieFactory', {
+    signer: account,
+    libraries: {
+      BookiesLibrary: bookiesLibrary.address,
+    },
+  })
+  const bookieFactory = await BookieFactory.deploy(_erc677LinkAddress, _registrarAddress)
+  await bookieFactory.deployed()
+  console.log('BookieFactory deployed:', bookieFactory.address)
+  contractAddresses[network.name]["bookieFactoryAddress"] = bookieFactory.address;
 
    // Create contract addresses json
    fs.writeFileSync(`./ContractAddresses.json`, JSON.stringify(contractAddresses), function(err) {
@@ -85,9 +85,9 @@ async function deployBookies (isTest=false, runChecks=false) {
     const tournamentAddress = await create_tournament(isTest, tournamentFactory.address, bookiesLibrary.address)
     console.log("Tournament Address: " + tournamentAddress  + "\n")
 
-    // // Create bookie
-    // const bookieAddress = await create_bookie(tournamentAddress, tournamentFactory.address, bookieFactory.address, bookiesLibrary.address)
-    // console.log("Bookie Address: " + bookieAddress)
+    // Create bookie
+    const bookieAddress = await create_bookie(tournamentAddress, tournamentFactory.address, bookieFactory.address, bookiesLibrary.address)
+    console.log("Bookie Address: " + bookieAddress)
   }
 }
 

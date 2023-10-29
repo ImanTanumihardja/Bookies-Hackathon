@@ -29,7 +29,7 @@ contract BookieFactory {
 
         require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        BookieInfo memory bookieInfo = BookieInfo(name, buyInPrice, 0, false, false, false, new address[](0), new address[](0), new address[](0), 0, address(tournament), 0, 0, 0, address(i_registry), msg.sender, address(this));
+        BookieInfo memory bookieInfo = BookieInfo(name, buyInPrice, 0, 0, 0, false, false, false, new address[](0), new address[](0), new address[](0), 0, address(tournament), 0, 0, 0, address(i_registry), msg.sender, address(this));
         Bookie bookie = new Bookie(bookieInfo);
 
         // Setup chainlink upkeep

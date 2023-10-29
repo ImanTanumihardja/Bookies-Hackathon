@@ -6,6 +6,7 @@ struct BookieInfo
     string name;
     uint256 buyInPrice;
     uint pool;
+    uint256 startDate;
     bool hasStarted;
     bool hasEnded;
     bool isCanceled;
