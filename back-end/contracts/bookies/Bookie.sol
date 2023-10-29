@@ -28,7 +28,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
     }
 
     function _duringTournament() private view {
-        require(!bookieInfo_.hasEnded, "Usage: Bookie has ended already");
+        require(!bookieInfo_.hasSettled, "Usage: Bookie has ended already");
         require(bookieInfo_.hasStarted, "Usage: Bookie has not closed yet");
     }
     modifier duringTournament() {
@@ -37,7 +37,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
     }
 
     function _beforeTournament() private view {
-        require(!bookieInfo_.hasEnded, "Usage: Bookie has ended already");
+        require(!bookieInfo_.hasSettled, "Usage: Bookie has ended already");
         require(!bookieInfo_.hasStarted, "Usage: Bookie is closed");
     }
     modifier beforeTournament() {
@@ -46,7 +46,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
     }
 
     function _afterTournament() private view {
-        require(bookieInfo_.hasEnded, "Usage: Bookie has not ended");
+        require(bookieInfo_.hasSettled, "Usage: Bookie has not ended");
         require(bookieInfo_.hasStarted, "Usage: Bookie has not yet closed");
     }
     modifier afterTournament() {
@@ -89,7 +89,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         TournamentInfo memory tournamentInfo = ITournament(bookieInfo.tournamentAddress).getTournamentInfo();
 
         require(!tournamentInfo.hasSettled, "Usage: Tournament has settled");
-        require(tournamentInfo.startDate < block.timestamp, "Usage: Tournament has started already");
+        require(tournamentInfo.startDate > block.timestamp, "Usage: Tournament has started already");
         require(!tournamentInfo.isCanceled, "Usage: Tournament is canceled");
 
         bookieInfo_ = bookieInfo;
@@ -138,7 +138,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         bookieInfo_.payout = bookieInfo_.buyInPrice;
 
         bookieInfo_.hasStarted = true;
-        bookieInfo_.hasEnded = true;
+        bookieInfo_.hasSettled = true;
         bookieInfo_.isCanceled = true;
     }
     
@@ -190,7 +190,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
 
     function withdrawUpkeepFunds() external onlyOwner
     {
-        require(bookieInfo_.upkeepId != 0 && bookieInfo_.hasEnded, "Usage: Cannot withdraw upkeep funds");
+        require(bookieInfo_.upkeepId != 0 && bookieInfo_.hasSettled, "Usage: Cannot withdraw upkeep funds");
 
         registry_.withdrawFunds(bookieInfo_.upkeepId, bookieInfo_.owner);
     }
@@ -201,7 +201,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         uint time = block.timestamp;
         address[] memory winners;        
         bool hasStarted = bookieInfo_.hasStarted;
-        bool hasEnded = bookieInfo_.hasEnded;
+        bool hasSettled = bookieInfo_.hasSettled;
         bool isCanceled = bookieInfo_.isCanceled;
 
         TournamentInfo memory tournamentInfo = tournament_.getTournamentInfo();
@@ -213,7 +213,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         } 
         else if (isCanceled) {
             isCanceled = true;
-            performData = abi.encode(time, winners, hasStarted, hasEnded, isCanceled);
+            performData = abi.encode(time, winners, hasStarted, hasSettled, isCanceled);
             return (upkeepNeeded, performData);
         }
 
@@ -224,7 +224,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         }
 
         // Check if tournament ended
-        if (!hasEnded && tournamentInfo.hasSettled) {
+        if (!hasSettled && tournamentInfo.hasSettled) {
             if (bookieInfo_.bracketOwners.length > 0) {
                 uint256 maxScore = 0;
                 uint256 count = 0;
@@ -260,17 +260,17 @@ contract Bookie is IBookie, KeeperCompatibleInterface
                 }
             }
 
-            hasEnded = true;
+            hasSettled = true;
             upkeepNeeded = true;
         }
         
-        performData = abi.encode(winners, hasStarted, hasEnded, isCanceled);
+        performData = abi.encode(winners, hasStarted, hasSettled, isCanceled);
         return (upkeepNeeded, performData);
     }
 
     function performUpkeep(bytes calldata performData) external override 
     {
-        (address[] memory winners, bool hasStarted, bool hasEnded, bool isCanceled) = abi.decode(performData, (address[], bool, bool, bool));
+        (address[] memory winners, bool hasStarted, bool hasSettled, bool isCanceled) = abi.decode(performData, (address[], bool, bool, bool));
         
         if (isCanceled && !bookieInfo_.isCanceled) {
             cancelBookieInternal();
@@ -280,7 +280,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         }
 
         // Check if tournament ended
-        if (hasEnded && !isCanceled) {
+        if (hasSettled && !isCanceled) {
             bookieInfo_.internalWinners = winners;
             bookieInfo_.winners = winners;
 
@@ -288,7 +288,7 @@ contract Bookie is IBookie, KeeperCompatibleInterface
             if (bookieInfo_.internalWinners.length != 0) {
                 bookieInfo_.payout = uint(bookieInfo_.pool) / uint(bookieInfo_.internalWinners.length);
             }
-            bookieInfo_.hasEnded = true;
+            bookieInfo_.hasSettled = true;
         }
 
         // Check if tournament started

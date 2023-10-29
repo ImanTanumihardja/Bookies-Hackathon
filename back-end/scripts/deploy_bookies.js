@@ -17,6 +17,8 @@ var _registrarAddress;
 var _tournamentFactoryString = "TournamentFactory";
 
 async function deployBookies (isTest=false, runChecks=false) {
+  const {RequestFactoryInfo} = require("./requestFactoryInfo")
+
   if (network.name == "mumbai") {
     _erc677LinkAddress = erc677LinkAddress_mumbai;
     _registrarAddress = _registrarAddress_mumbai;
@@ -24,10 +26,6 @@ async function deployBookies (isTest=false, runChecks=false) {
   else {
     _erc677LinkAddress = _erc677LinkAddress_goerli;
     _registrarAddress = _registrarAddress_goerli
-  }
-
-  if (isTest) {
-    _tournamentFactoryString = "TestTournamentFactory"
   }
 
   console.log("DEPLOYING CONTRACTS")
@@ -45,6 +43,12 @@ async function deployBookies (isTest=false, runChecks=false) {
   console.log('BookiesLibrary deployed:', bookiesLibrary.address)
   contractAddresses[network.name]["bookiesLibraryAddress"] = bookiesLibrary.address;
 
+  const RequestFactory = await ethers.getContractFactory('RequestFactory')
+  const requestFactory = await RequestFactory.deploy(RequestFactoryInfo.oracleAddress, RequestFactoryInfo.proposerReward, RequestFactoryInfo.proposerBond, RequestFactoryInfo.livenessTime, RequestFactoryInfo.collateralCurrency, ethers.utils.formatBytes32String(RequestFactoryInfo.priceIdentifier))
+  await requestFactory.deployed()
+  console.log('RequestFactory deployed:', requestFactory.address)
+  contractAddresses[network.name]["requestFactoryAddress"] = requestFactory.address;
+
   // Create tournament factory
   const TournamentFactory = await ethers.getContractFactory(_tournamentFactoryString, {
     signer: account,
@@ -53,7 +57,7 @@ async function deployBookies (isTest=false, runChecks=false) {
     },
   })
   
-  const tournamentFactory = await TournamentFactory.deploy(_erc677LinkAddress, _registrarAddress)
+  const tournamentFactory = await TournamentFactory.deploy(_erc677LinkAddress, _registrarAddress, requestFactory.address)
   await tournamentFactory.deployed()
   console.log('TournamentFactory deployed:', tournamentFactory.address)
   contractAddresses[network.name]["tournamentFactoryAddress"] = tournamentFactory.address;

@@ -3,10 +3,7 @@ pragma solidity ^0.8.16;
 
 import"./ITournament.sol";
 import './RequestFactory.sol';
-import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./BookiesLibrary.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uma/core/contracts/optimistic-oracle-v2/interfaces/OptimisticOracleV2Interface.sol";
 
 contract Tournament is ITournament 
 {

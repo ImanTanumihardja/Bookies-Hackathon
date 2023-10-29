@@ -66,7 +66,7 @@ async function createBookie (tournamentAddress="", tournamentFactoryAddress="", 
   await (await chainlinkToken.approve(bookieFactory.address,  bookieRegistryFundingAmount)).wait()
   console.log("Total Chainlink Approval: " + (bookieRegistryFundingAmount))
 
-  const createBookieTransaction = await bookieFactory.createBookie(BookieInfo.name, 1, tournamentAddress, BookieInfo.gasLimit)
+  const createBookieTransaction = await bookieFactory.createBookie(BookieInfo.name, BookieInfo.buyInPrice, tournamentAddress, BookieInfo.gasLimit)
   await createBookieTransaction.wait()
   const bookies = await bookieFactory.getBookies();
   const bookie = await ethers.getContractAt('Bookie', bookies[bookies.length - 1])

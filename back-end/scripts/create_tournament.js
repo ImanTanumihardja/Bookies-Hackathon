@@ -44,20 +44,7 @@ async function createTournament (isTest=false, tournamentFactoryAddress="", book
 
   const tournamentFactory = await ethers.getContractAt(tournamentFactoryString, tournamentFactoryAddress)
 
-  // Get max gas payment
-  bookiesLibrary = await ethers.getContractAt('BookiesLibrary', bookiesLibraryAddress)
-  const chainlinkToken = await ethers.getContractAt(abi=_chainlinkTokenABI, address=erc677LinkAddress)
-  const registrar = await ethers.getContractAt(abi=_chainlinkRegistrarABI, address=registrarAddress)
-  const [, , , registryAddress, ] = await registrar.getRegistrationConfig()
-  const registry = await ethers.getContractAt(abi=_chainlinkRegistryABI, address=registryAddress)
-  const maxPaymentForGas = await registry.getMaxPaymentForGas(TournamentInfo.gasLimit)
-
-  // Approve link transfer
-  const registryFundingAmount = await bookiesLibrary.calculateLinkPayment(maxPaymentForGas)
-  await (await chainlinkToken.approve(tournamentFactory.address, registryFundingAmount)).wait()
-  console.log("Total Chainlink Approval: " + registryFundingAmount)
-
-  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate, TournamentInfo.endDate, TournamentInfo.oracleAddress, TournamentInfo.collateralCurrencyAddress, TournamentInfo.gasLimit)
+  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.eventID, TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate)
   await createTournamentTransaction.wait();
 
   const tournaments = await tournamentFactory.getTournaments();

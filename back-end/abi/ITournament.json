@@ -36,7 +36,7 @@
               },
               {
                 "internalType": "bytes32",
-                "name": "assertionId",
+                "name": "requestId",
                 "type": "bytes32"
               }
             ],
@@ -60,6 +60,11 @@
       {
         "components": [
           {
+            "internalType": "uint256",
+            "name": "eventId",
+            "type": "uint256"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -68,21 +73,6 @@
             "internalType": "uint256",
             "name": "startDate",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasStarted",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasEnded",
-            "type": "bool"
           },
           {
             "internalType": "bool",
@@ -131,23 +121,13 @@
           },
           {
             "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
             "name": "registryAddress",
             "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "oracleAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "collateralCurrency",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "proposerBond",
-            "type": "uint256"
           }
         ],
         "internalType": "struct TournamentInfo",
@@ -169,6 +149,34 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "identifier",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ancillaryData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "int256",
+        "name": "price",
+        "type": "int256"
+      }
+    ],
+    "name": "requestSettled",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

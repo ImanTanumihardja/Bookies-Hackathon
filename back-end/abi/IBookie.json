@@ -55,6 +55,11 @@
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "startDate",
+            "type": "uint256"
+          },
+          {
             "internalType": "bool",
             "name": "hasStarted",
             "type": "bool"

@@ -8,7 +8,7 @@ struct BookieInfo
     uint pool;
     uint256 startDate;
     bool hasStarted;
-    bool hasEnded;
+    bool hasSettled;
     bool isCanceled;
     address[] bracketOwners;
     address[] winners;

@@ -4,6 +4,11 @@
       {
         "components": [
           {
+            "internalType": "uint256",
+            "name": "eventId",
+            "type": "uint256"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -12,21 +17,6 @@
             "internalType": "uint256",
             "name": "startDate",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasStarted",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasEnded",
-            "type": "bool"
           },
           {
             "internalType": "bool",
@@ -75,23 +65,13 @@
           },
           {
             "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
             "name": "registryAddress",
             "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "oracleAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "collateralCurrency",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "proposerBond",
-            "type": "uint256"
           }
         ],
         "internalType": "struct TournamentInfo",
@@ -107,30 +87,6 @@
     "name": "cancelTournament",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "name": "checkUpkeep",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "upkeepNeeded",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "performData",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -163,7 +119,7 @@
               },
               {
                 "internalType": "bytes32",
-                "name": "assertionId",
+                "name": "requestId",
                 "type": "bytes32"
               }
             ],
@@ -187,6 +143,11 @@
       {
         "components": [
           {
+            "internalType": "uint256",
+            "name": "eventId",
+            "type": "uint256"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -195,21 +156,6 @@
             "internalType": "uint256",
             "name": "startDate",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasStarted",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "hasEnded",
-            "type": "bool"
           },
           {
             "internalType": "bool",
@@ -258,23 +204,13 @@
           },
           {
             "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
             "name": "registryAddress",
             "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "oracleAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "collateralCurrency",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "proposerBond",
-            "type": "uint256"
           }
         ],
         "internalType": "struct TournamentInfo",
@@ -301,19 +237,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "performData",
-        "type": "bytes"
-      }
-    ],
-    "name": "performUpkeep",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "identifier",
         "type": "bytes32"
@@ -334,7 +257,7 @@
         "type": "int256"
       }
     ],
-    "name": "priceSettled",
+    "name": "requestSettled",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

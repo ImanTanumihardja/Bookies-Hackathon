@@ -2,8 +2,6 @@
 pragma solidity ^0.8.16;
 
 import"./ITournament.sol";
-import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
-import "./BookiesLibrary.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uma/core/contracts/optimistic-oracle-v2/interfaces/OptimisticOracleV2Interface.sol";
 
@@ -17,15 +15,14 @@ struct DataRequest{
 contract RequestFactory
 {
     event NewRequest(bytes32);
-    using BookiesLibrary for string;
 
     /*  Public Variables    */
-    OptimisticOracleV2Interface public oo;
-    uint256 public proposerReward;
-    uint256 public proposerBond;
-    uint64 public livenessTime;
-    address public collateralCurrency;
-    bytes32 public priceIdentifier;
+    OptimisticOracleV2Interface public immutable oo;
+    uint256 public immutable proposerReward;
+    uint256 public immutable proposerBond;
+    uint64 public immutable livenessTime;
+    address public immutable collateralCurrency;
+    bytes32 public immutable priceIdentifier;
     mapping(bytes32 => DataRequest) public dataRequests;
     bytes32[] public requestIDs;
 

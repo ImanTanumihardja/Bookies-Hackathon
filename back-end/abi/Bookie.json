@@ -19,6 +19,11 @@
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "startDate",
+            "type": "uint256"
+          },
+          {
             "internalType": "bool",
             "name": "hasStarted",
             "type": "bool"
@@ -174,6 +179,11 @@
           {
             "internalType": "uint256",
             "name": "pool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startDate",
             "type": "uint256"
           },
           {

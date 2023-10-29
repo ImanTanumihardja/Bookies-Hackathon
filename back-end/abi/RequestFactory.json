@@ -1,0 +1,234 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "oracleAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_proposerReward",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_proposerBond",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "_livenessTime",
+        "type": "uint64"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralCurrency",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_priceIdentifier",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "NewRequest",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "collateralCurrency",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "dataRequests",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "eventID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ancillaryData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "int256",
+        "name": "price",
+        "type": "int256"
+      },
+      {
+        "internalType": "address",
+        "name": "callbackAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "livenessTime",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oo",
+    "outputs": [
+      {
+        "internalType": "contract OptimisticOracleV2Interface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "priceIdentifier",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "identifier",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ancillaryData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "int256",
+        "name": "price",
+        "type": "int256"
+      }
+    ],
+    "name": "priceSettled",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proposerBond",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proposerReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "eventID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ancillaryData",
+        "type": "bytes"
+      }
+    ],
+    "name": "requestData",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "requestID",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "requestIDs",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

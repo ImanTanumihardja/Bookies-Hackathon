@@ -33,7 +33,6 @@ struct TournamentInfo {
     address factory;
     address requestFactoryAddress;
     address registryAddress;
-    uint256 proposerBond;
 }
 
 interface ITournament {
