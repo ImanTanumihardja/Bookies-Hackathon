@@ -45,7 +45,7 @@ library BookiesLibrary {
 
     // TODO
     function calculateLinkPayment(uint256 maxGasPayment) public pure returns(uint registryFundingAmount) {
-        uint256 MIN_REGISTRY_FUNDING_AMOUNT = 15000000000000000000; // 15 link
+        uint256 MIN_REGISTRY_FUNDING_AMOUNT = 8000000000000000000; // 8 link
         
         uint256 numUpdates = 8; //TODO: Calculate number of updates based on how many rounds
 

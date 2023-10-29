@@ -38,7 +38,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
     mapping(bytes32 => GameRequestInfo) private gameIndexes_; // Mapping of assertionId to game
     TournamentInfo private tournamentInfo_;
     OptimisticOracleV2Interface private oo_;
-    bytes32 private priceIdentifier = "NUMERICAL";
+    bytes32 private priceIdentifier = "YES_OR_NO_QUERY";
     uint64 private livenessTime = 10;
     uint256 private proposerReward = 0;
 
@@ -71,7 +71,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                         Game memory game = Game(tournamentInfo_.teamNames[j], tournamentInfo_.teamNames[j+1], "", 0);
 
                         // Submit a new request to the Optimistic Oracle
-                        bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '\", ', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5' ));
+                        bytes memory assertedClaim = (abi.encodePacked('q: title: Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will resolve to the winner between ', game.homeTeam, ' and ', game.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5'));
                         bytes32 assertionID = requestOracleData(assertedClaim);
                         game.assertionId = assertionID;
                         gameIndexes_[assertionID] = GameRequestInfo(i, j/2);
@@ -128,7 +128,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
             game.winner = 'unresolvable';
 
             // Submit a request to the Optimistic Oracle again
-            bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '\", ', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5' ));
+            bytes memory assertedClaim = (abi.encodePacked('q:title:Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will reslove to the winner between ', game.homeTeam, ' and ', game.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5' ));
             bytes32 newAssertionId = requestOracleData(assertedClaim);
             game.assertionId = newAssertionId;
             gameIndexes_[newAssertionId] = gameIndexes_[assertionId];
@@ -151,7 +151,7 @@ contract Tournament is ITournament, KeeperCompatibleInterface
                 // Check if ready to assert next game
                 if (!nextRoundGame.homeTeam.compareStrings("") && !nextRoundGame.awayTeam.compareStrings("") && nextRoundGame.assertionId == 0){
                     // Submit a new request to the Optimistic Oracle
-                    bytes memory assertedClaim = (abi.encodePacked('q:\"Who won between ', nextRoundGame.homeTeam, ' vs ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name, '\", ', nextRoundGame.homeTeam, ':1 ', nextRoundGame.awayTeam, ':0, tie:0.5, unresolvable:-1' ));
+                     bytes memory assertedClaim = (abi.encodePacked('q:title:Who won between ', nextRoundGame.homeTeam, ' vs ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will reslove to the winner between ', nextRoundGame.homeTeam, ' and ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', nextRoundGame.homeTeam, ':1 ', nextRoundGame.awayTeam, ':0, unresolvable:0.5' ));
                     bytes32 nextAssertionID = requestOracleData(assertedClaim);
                     nextRoundGame.assertionId = nextAssertionID;
                     gameIndexes_[nextAssertionID] = GameRequestInfo(roundNumber+1, gameIndex/2);
@@ -263,12 +263,11 @@ contract Tournament is ITournament, KeeperCompatibleInterface
         );
 
         // Set the Optimistic oracle liveness for the price request.
-        uint256 customLiveness = tournamentInfo_.endDate - requestTimestamp > 0 ? tournamentInfo_.endDate - requestTimestamp + livenessTime : livenessTime;
         oo_.setCustomLiveness(
             priceIdentifier,
             requestTimestamp,
             assertedClaim,
-            customLiveness
+            livenessTime
         );
 
         // Set the Optimistic oracle proposer bond for the price request.
