@@ -4,23 +4,29 @@ pragma solidity ^0.8.11;
 struct BookieInfo 
 {
     string name;
-    uint256 buyInPrice;
-    uint pool;
+    bytes32 requestID;
+    int256 result;
     uint256 startDate;
     bool hasStarted;
     bool hasSettled;
     bool isCanceled;
-    address[] bracketOwners;
-    address[] winners;
-    address[] internalWinners;
-    uint256 payout;
-    address tournamentAddress;
-    uint256 teamCount; // Adjacent teams are paired together for a game
-    uint256 gameCount;
+    uint256[] odds; // In decimal percent form
+    uint256 totalLP;
+    uint256 usedLP;
     uint256 upkeepId;
+    address[] betters;
     address registryAddress;
     address owner;
     address factory;
+    address requestFactoryAddress;
+}
+
+    
+struct Bet
+{
+    int256 prediction;
+    uint256 wager; 
+    uint256 payout;
 }
 
 interface IBookie 
@@ -31,11 +37,11 @@ interface IBookie
 
     function cancelBookie() external;
     
-    function createBracket(uint256[] calldata bracket) external payable;
+    function placeBet(int256 prediction) external payable;
 
-    function cancelBracket() external payable; 
+    function cancelBet() external payable; 
 
-    function getBracket(address addr) external view returns(uint256[] memory);
+    function getBet(address addr) external view returns(Bet memory);
 
     function withdrawUpkeepFunds() external;
 }

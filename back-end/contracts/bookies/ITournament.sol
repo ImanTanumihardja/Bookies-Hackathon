@@ -6,6 +6,7 @@ struct Game {
     string awayTeam;
     string winner;
     bytes32 requestId;
+    uint256 date;
 }
 
 struct GameRequestInfo{
@@ -26,13 +27,13 @@ struct TournamentInfo {
     bool isCanceled;
     uint256[] result; // List of number of games each team won
     string[] teamNames; // Adjacent teams are paired together for a game
+    uint256[] gameDates;
     uint256 numRounds;
     uint256 numGames;
     uint256 upkeepId;
     address owner;
     address factory;
     address requestFactoryAddress;
-    address registryAddress;
 }
 
 interface ITournament {
@@ -44,8 +45,6 @@ interface ITournament {
     function getRounds() view external returns(Round[] memory);
 
     function cancelTournament() external;
-
-    function withdrawUpkeepFunds() external;
 
     function requestSettled(bytes32 identifier, uint256 timestamp, bytes memory ancillaryData,int256 price) external;
 }

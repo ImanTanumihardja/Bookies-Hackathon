@@ -77,6 +77,11 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "eventDate",
+        "type": "uint256"
+      },
+      {
         "internalType": "bytes",
         "name": "ancillaryData",
         "type": "bytes"
@@ -193,6 +198,11 @@
       {
         "internalType": "uint256",
         "name": "eventID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "eventDate",
         "type": "uint256"
       },
       {

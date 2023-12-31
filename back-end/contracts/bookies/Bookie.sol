@@ -2,10 +2,9 @@
 pragma solidity ^0.8.11;
 
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
-import '@chainlink/contracts/src/v0.8/ConfirmedOwner.sol';
-import "./ITournament.sol";
 import "./IBookie.sol";
 import "./BookiesLibrary.sol";
+import './RequestFactory.sol';
 
 contract Bookie is IBookie, KeeperCompatibleInterface 
 {
@@ -36,21 +35,21 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         _;
     }
 
-    function _beforeTournament() private view {
+    function _beforeEvent() private view {
         require(!bookieInfo_.hasSettled, "Usage: Bookie has ended already");
         require(!bookieInfo_.hasStarted, "Usage: Bookie is closed");
     }
-    modifier beforeTournament() {
-        _beforeTournament();
+    modifier beforeEvent() {
+        _beforeEvent();
         _;
     }
 
-    function _afterTournament() private view {
+    function _afterEvent() private view {
         require(bookieInfo_.hasSettled, "Usage: Bookie has not ended");
         require(bookieInfo_.hasStarted, "Usage: Bookie has not yet closed");
     }
-    modifier afterTournament() {
-        _afterTournament();
+    modifier afterEvent() {
+        _afterEvent();
         _;
     }
 
@@ -62,11 +61,11 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         _;
     }
 
-    function _hasBracket() private view {
-        require(brackets[msg.sender].length != 0, "Usage: You don't have a bracket");
+    function _hasBet() private view {
+        require(bets_[msg.sender].wager != 0, "Usage: You don't have a bet");
     }
-    modifier hasBracket() {
-        _hasBracket();
+    modifier hasBet() {
+        _hasBet();
         _;
     }
 
@@ -74,31 +73,19 @@ contract Bookie is IBookie, KeeperCompatibleInterface
 
     /*  Private Variables    */
     IRegistry private registry_;
-    ITournament private tournament_;
-    mapping(address => uint256[]) private brackets;
     BookieInfo private bookieInfo_;
+    RequestFactory private requestFactory_;
+    mapping(address => Bet) private bets_;
 
-    constructor(BookieInfo memory bookieInfo)
+    constructor(BookieInfo memory bookieInfo) payable
     {
         require(!bookieInfo.name.compareStrings(""), "Usage: Cannot not have empty string as name");
-        require(bookieInfo.buyInPrice > 0, "Usage: Buy in price must be greater than 0");
-        require(bookieInfo.pool == 0, "Usage: Pool must be 0");
-        require(bookieInfo.tournamentAddress != address(0), "Usage: Tournament address cannot be 0x0");
-
-        tournament_ = ITournament(bookieInfo.tournamentAddress);
-        TournamentInfo memory tournamentInfo = ITournament(bookieInfo.tournamentAddress).getTournamentInfo();
-
-        require(!tournamentInfo.hasSettled, "Usage: Tournament has settled");
-        require(tournamentInfo.startDate > block.timestamp, "Usage: Tournament has started already");
-        require(!tournamentInfo.isCanceled, "Usage: Tournament is canceled");
+        require(bookieInfo.totalLP == msg.value, "Usage: You did not send enough Liqiudity");
 
         bookieInfo_ = bookieInfo;
 
-        bookieInfo_.buyInPrice *= 1 wei;
-        bookieInfo_.startDate = tournamentInfo.startDate;
-        bookieInfo_.teamCount = tournamentInfo.teamNames.length;
-        bookieInfo_.gameCount = tournamentInfo.numGames;
         registry_ = IRegistry(bookieInfo_.registryAddress);
+        requestFactory_ = RequestFactory(bookieInfo_.requestFactoryAddress);
     }
 
     function setUpkeepId(uint256 upkeepId) external onlyFactory {
@@ -106,23 +93,24 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         bookieInfo_.upkeepId = upkeepId;
     }
 
-    function collectPayout() external payable afterTournament hasBracket
+    function collectPayout() external payable afterEvent hasBet
     {
-        bool isWinner = false;
-        for (uint i = 0; i < bookieInfo_.internalWinners.length; i++) {
-            if(bookieInfo_.internalWinners[i] == msg.sender){
-                isWinner = true;
-                bookieInfo_.internalWinners[i] = bookieInfo_.internalWinners[bookieInfo_.internalWinners.length - 1];
-                bookieInfo_.internalWinners.pop();
+        Bet memory bet = bets_[msg.sender];
+        require(bet.prediction == bookieInfo_.result, "Usage: You did not win.");
+
+        // Remove better from list
+        for (uint i = 0; i < bookieInfo_.betters.length; i++) {
+            if (bookieInfo_.betters[i] == msg.sender) {
+                bookieInfo_.betters[i] = bookieInfo_.betters[bookieInfo_.betters.length - 1];
+                bookieInfo_.betters.pop();
                 break;
             }
         }
-        require(isWinner, "You did not win");
 
-        // Pay max score bracket owners
-        (bool sent, ) = payable(msg.sender).call{ value: bookieInfo_.payout }("");
+        (bool sent, ) = payable(msg.sender).call{ value: bet.wager }("");
         require(sent, "Failed to send Ether");
-        bookieInfo_.pool -= bookieInfo_.payout;
+        bookieInfo_.usedLP -= bet.wager;
+        bets_[msg.sender] = Bet(0, 0, 0);
     }
 
     function cancelBookie() external onlyOwner
@@ -130,52 +118,44 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         cancelBookieInternal();
     }
 
-    function cancelBookieInternal() internal beforeTournament notCanceled
+    function cancelBookieInternal() internal beforeEvent notCanceled
     {
         require(bookieInfo_.upkeepId != 0 , "Usage: No UpkeepID");
 
-        bookieInfo_.internalWinners = bookieInfo_.bracketOwners;
-        bookieInfo_.payout = bookieInfo_.buyInPrice;
 
         bookieInfo_.hasStarted = true;
         bookieInfo_.hasSettled = true;
         bookieInfo_.isCanceled = true;
     }
     
-    function createBracket(uint256[] calldata bracket) external payable beforeTournament 
+    function placeBet(int256 prediction) external payable beforeEvent 
     {
-        require(bracket.length == bookieInfo_.teamCount, "Usage: Not the same team count");
+        require(msg.value > 0, "Usage: Wager must be greater than 0");
+        require(prediction == 1 || prediction == 0, "Usage: Invalid prediction");
+        
+        // Check if enough LP to place bet with given odds
+        uint256 payout = msg.value / bookieInfo_.odds[uint256(prediction)];
+        require(bookieInfo_.usedLP + payout <= bookieInfo_.totalLP, "Usage: Wager amount too large");
 
-        // Check bracket form
-        uint256 bracketGameCount = 0;
-        for (uint256 i = 0; i < bracket.length; i++) {
-            bracketGameCount += bracket[i];
-        }
-        require(bracketGameCount == bookieInfo_.gameCount, "Usage: Incorrect bracket form");
-
-        if (brackets[msg.sender].length == 0) {
-            require(msg.value == bookieInfo_.buyInPrice, "Usage: Incorrect amount of ether");
-            bookieInfo_.pool += bookieInfo_.buyInPrice;
-            bookieInfo_.bracketOwners.push(msg.sender);
-        }
-
-        brackets[msg.sender] = bracket;
+        bets_[msg.sender] = Bet(prediction, msg.value, payout);
+        bookieInfo_.betters.push(msg.sender);
+        bookieInfo_.usedLP += payout;
     }
 
-    function cancelBracket() external payable beforeTournament hasBracket
+    function cancelBet() external payable beforeEvent hasBet
     {
-        brackets[msg.sender] = new uint256[](0);
-        for (uint i = 0; i < bookieInfo_.bracketOwners.length; i++) {
-            if (bookieInfo_.bracketOwners[i] == msg.sender) {
-                bookieInfo_.bracketOwners[i] = bookieInfo_.bracketOwners[bookieInfo_.bracketOwners.length - 1];
-                bookieInfo_.bracketOwners.pop();
+        for (uint i = 0; i < bookieInfo_.betters.length; i++) {
+            if (bookieInfo_.betters[i] == msg.sender) {
+                bookieInfo_.betters[i] = bookieInfo_.betters[bookieInfo_.betters.length - 1];
+                bookieInfo_.betters.pop();
                 break;
             }
         }
 
-        (bool sent, ) = payable(msg.sender).call{ value: bookieInfo_.buyInPrice }("");
+        (bool sent, ) = payable(msg.sender).call{ value: bets_[msg.sender].wager }("");
         require(sent, "Failed to send Ether");
-        bookieInfo_.pool -= bookieInfo_.buyInPrice;
+        bookieInfo_.usedLP -= bets_[msg.sender].wager;
+        bets_[msg.sender] = Bet(0, 0, 0);
     }
 
     function getBookieInfo() external view returns(BookieInfo memory) 
@@ -183,9 +163,9 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         return bookieInfo_;
     }
 
-    function getBracket(address addr) external view returns(uint256[] memory)
+    function getBet(address addr) external view returns(Bet memory)
     {
-        return brackets[addr];
+        return bets_[addr];
     }
 
     function withdrawUpkeepFunds() external onlyOwner
@@ -199,21 +179,15 @@ contract Bookie is IBookie, KeeperCompatibleInterface
     function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory performData) 
     {
         uint time = block.timestamp;
-        address[] memory winners;        
+        int256 result;        
         bool hasStarted = bookieInfo_.hasStarted;
         bool hasSettled = bookieInfo_.hasSettled;
         bool isCanceled = bookieInfo_.isCanceled;
 
-        TournamentInfo memory tournamentInfo = tournament_.getTournamentInfo();
-
         // Check if tournament canceled
-        if (!isCanceled && tournamentInfo.isCanceled) {
+        if (isCanceled) {
             isCanceled = true;
-            upkeepNeeded = true;
-        } 
-        else if (isCanceled) {
-            isCanceled = true;
-            performData = abi.encode(time, winners, hasStarted, hasSettled, isCanceled);
+            performData = abi.encode(result, hasStarted, hasSettled, isCanceled);
             return (upkeepNeeded, performData);
         }
 
@@ -223,54 +197,22 @@ contract Bookie is IBookie, KeeperCompatibleInterface
             upkeepNeeded = true;
         }
 
-        // Check if tournament ended
-        if (!hasSettled && tournamentInfo.hasSettled) {
-            if (bookieInfo_.bracketOwners.length > 0) {
-                uint256 maxScore = 0;
-                uint256 count = 0;
-                address addr;
-                uint256 score;
-                uint256[] memory result = tournament_.getTournamentResult();
-                uint256[] memory scores = new uint256[](bookieInfo_.bracketOwners.length);
-
-                // Find max score and number of max score brackets
-                for (uint i = 0; i < bookieInfo_.bracketOwners.length; i++) {
-                    addr = bookieInfo_.bracketOwners[i];
-                    score = BookiesLibrary.calculateScore(brackets[addr], result);
-                    scores[i] = score;
-                    if (maxScore < score) {
-                        maxScore = score;
-                        count = 1;
-                    }
-                    else if (maxScore == score) {
-                        count++;
-                    }
-                }
-
-                winners = new address[](count);
-                uint j = 0;
-                // Create winners array
-                for (uint i = 0; i < bookieInfo_.bracketOwners.length; i++) {
-                    addr = bookieInfo_.bracketOwners[i];
-                    score = scores[i];
-                    if (maxScore == score) {
-                        winners[j] = addr;
-                        j++;
-                    }
-                }
-            }
+        // Check if game has settled from requestFactory TODO
+        DataRequest memory dataRequest_ = requestFactory_.getDataRequest(bookieInfo_.requestID);
+        if (!hasSettled && dataRequest_.hasSettled) {
+            result = dataRequest_.price;
 
             hasSettled = true;
             upkeepNeeded = true;
         }
         
-        performData = abi.encode(winners, hasStarted, hasSettled, isCanceled);
+        performData = abi.encode(result, hasStarted, hasSettled, isCanceled);
         return (upkeepNeeded, performData);
     }
 
     function performUpkeep(bytes calldata performData) external override 
     {
-        (address[] memory winners, bool hasStarted, bool hasSettled, bool isCanceled) = abi.decode(performData, (address[], bool, bool, bool));
+        (int256 result, bool hasStarted, bool hasSettled, bool isCanceled) = abi.decode(performData, (int256, bool, bool, bool));
         
         if (isCanceled && !bookieInfo_.isCanceled) {
             cancelBookieInternal();
@@ -280,14 +222,8 @@ contract Bookie is IBookie, KeeperCompatibleInterface
         }
 
         // Check if tournament ended
-        if (hasSettled && !isCanceled) {
-            bookieInfo_.internalWinners = winners;
-            bookieInfo_.winners = winners;
-
-            // No winners
-            if (bookieInfo_.internalWinners.length != 0) {
-                bookieInfo_.payout = uint(bookieInfo_.pool) / uint(bookieInfo_.internalWinners.length);
-            }
+        if (hasSettled && !bookieInfo_.hasSettled) {
+            bookieInfo_.result = result;
             bookieInfo_.hasSettled = true;
         }
 

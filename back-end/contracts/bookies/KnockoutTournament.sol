@@ -5,7 +5,7 @@ import"./ITournament.sol";
 import './RequestFactory.sol';
 import "./BookiesLibrary.sol";
 
-contract Tournament is ITournament 
+contract KnockoutTournament is ITournament 
 {
     function _onlyOwner() private view {
         require(msg.sender == tournamentInfo_.owner);
@@ -29,8 +29,6 @@ contract Tournament is ITournament
 
 
     /*  Private Variables    */
-    IRegistry private registry_;
-    uint private lastAssertTime_; // Time of last assertion
     Round[] private rounds; // List of rounds in tournament
     mapping(bytes32 => GameRequestInfo) private gameIndexes_; // Mapping of requestId to game
     TournamentInfo private tournamentInfo_;
@@ -42,8 +40,6 @@ contract Tournament is ITournament
         require(tournamentInfo.startDate > block.timestamp, "Usage: Start date has already passed");
 
         tournamentInfo_ = tournamentInfo;
-
-        registry_ = IRegistry(tournamentInfo_.registryAddress);
         requestFactory_ = RequestFactory(tournamentInfo_.requestFactoryAddress);
 
         // Initialize results
@@ -54,17 +50,18 @@ contract Tournament is ITournament
         rounds = new Round[](tournamentInfo_.numRounds);
         // Create rounds
         uint256 teamCount = tournamentInfo_.teamNames.length;
+        uint256 gameCount = 0;
         for (uint i = 0; i < tournamentInfo_.numRounds; i++) {
             rounds[i].roundNumber = i;
             Game[] storage games = rounds[i].games;
             if (i == 0) {
                 for (uint j = 0; j < teamCount; j++) {
                     if (j % 2 == 0) {
-                        Game memory game = Game(tournamentInfo_.teamNames[j], tournamentInfo_.teamNames[j+1], "", 0);
+                        Game memory game = Game(tournamentInfo_.teamNames[j], tournamentInfo_.teamNames[j+1], "", 0, tournamentInfo_.gameDates[gameCount++]);
 
                         // Submit a new request to the Optimistic Oracle
                         bytes memory ancillaryData = (abi.encodePacked('q: title: Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will resolve to the winner between ', game.homeTeam, ' and ', game.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5'));
-                        bytes32 requestID = requestFactory_.requestData(tournamentInfo_.eventId, ancillaryData);
+                        bytes32 requestID = requestFactory_.requestData(tournamentInfo_.eventId, game.date, ancillaryData);
                         game.requestId = requestID;
                         gameIndexes_[requestID] = GameRequestInfo(i, j/2);
 
@@ -75,7 +72,7 @@ contract Tournament is ITournament
             else {
                 for (uint j = 0; j < teamCount; j++) {
                     if (j % 2 == 0) {
-                        games.push(Game("", "", "", 0));
+                        games.push(Game("", "", "", 0, tournamentInfo_.gameDates[gameCount++]));
                     }
                 }
             }
@@ -121,7 +118,7 @@ contract Tournament is ITournament
 
             // Submit a request to the Optimistic Oracle again
             bytes memory newAncillaryData = (abi.encodePacked('q: title: Who won between ', game.homeTeam, ' vs ', game.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will resolve to the winner between ', game.homeTeam, ' and ', game.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', game.homeTeam, ':1 ', game.awayTeam, ':0, unresolvable:0.5'));
-            bytes32 newAssertionId = requestFactory_.requestData(tournamentInfo_.eventId, newAncillaryData);
+            bytes32 newAssertionId = requestFactory_.requestData(tournamentInfo_.eventId, game.date, newAncillaryData);
             game.requestId = newAssertionId;
             gameIndexes_[newAssertionId] = gameIndexes_[requestId];
             return;
@@ -143,8 +140,8 @@ contract Tournament is ITournament
                 // Check if ready to assert next game
                 if (!nextRoundGame.homeTeam.compareStrings("") && !nextRoundGame.awayTeam.compareStrings("") && nextRoundGame.requestId == 0){
                     // Submit a new request to the Optimistic Oracle
-                     bytes memory newAncillaryData = (abi.encodePacked('q:title:Who won between ', nextRoundGame.homeTeam, ' vs ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will reslove to the winner between ', nextRoundGame.homeTeam, ' and ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', nextRoundGame.homeTeam, ':1 ', nextRoundGame.awayTeam, ':0, unresolvable:0.5' ));
-                    bytes32 nextRequestID = requestFactory_.requestData(tournamentInfo_.eventId, newAncillaryData);
+                    bytes memory newAncillaryData = (abi.encodePacked('q:title:Who won between ', nextRoundGame.homeTeam, ' vs ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name, '?, description: This market will reslove to the winner between ', nextRoundGame.homeTeam, ' and ', nextRoundGame.awayTeam, ' in the ', tournamentInfo_.name,'. Please do not propose results before the event ends.', nextRoundGame.homeTeam, ':1 ', nextRoundGame.awayTeam, ':0, unresolvable:0.5' ));
+                    bytes32 nextRequestID = requestFactory_.requestData(tournamentInfo_.eventId, nextRoundGame.date, newAncillaryData);
                     nextRoundGame.requestId = nextRequestID;
                     gameIndexes_[nextRequestID] = GameRequestInfo(roundNumber+1, gameIndex/2);
                 }
@@ -172,7 +169,6 @@ contract Tournament is ITournament
         require(tournamentInfo_.upkeepId != 0 , "Usage: No UpkeepID");
 
         tournamentInfo_.isCanceled = true;
-        registry_.cancelUpkeep(tournamentInfo_.upkeepId);
     }
 
     function getTournamentResult() view external override returns(uint256[] memory)
@@ -182,12 +178,5 @@ contract Tournament is ITournament
 
     function getTournamentInfo() view external override returns(TournamentInfo memory) {
         return tournamentInfo_;
-    }
-
-    function withdrawUpkeepFunds() external onlyOwner
-    {
-        require(tournamentInfo_.upkeepId != 0 && (tournamentInfo_.hasSettled || tournamentInfo_.isCanceled), "Usage: Cannot withdraw upkeep funds");
-
-        registry_.withdrawFunds(tournamentInfo_.upkeepId, tournamentInfo_.owner);
     }
 }

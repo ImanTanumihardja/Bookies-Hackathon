@@ -44,7 +44,7 @@ async function createTournament (isTest=false, tournamentFactoryAddress="", book
 
   const tournamentFactory = await ethers.getContractAt(tournamentFactoryString, tournamentFactoryAddress)
 
-  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.eventID, TournamentInfo.name, TournamentInfo.teamName, TournamentInfo.numRounds, TournamentInfo.startDate)
+  const createTournamentTransaction = await tournamentFactory.createTournament(TournamentInfo.eventID, TournamentInfo.name, TournamentInfo.teamNames, TournamentInfo.numRounds, TournamentInfo.startDate, TournamentInfo.gameDates)
   await createTournamentTransaction.wait();
 
   const tournaments = await tournamentFactory.getTournaments();

@@ -9,14 +9,9 @@
             "type": "string"
           },
           {
-            "internalType": "uint256",
-            "name": "buyInPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "pool",
-            "type": "uint256"
+            "internalType": "bytes32",
+            "name": "requestID",
+            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -30,48 +25,13 @@
           },
           {
             "internalType": "bool",
-            "name": "hasEnded",
+            "name": "hasSettled",
             "type": "bool"
           },
           {
             "internalType": "bool",
             "name": "isCanceled",
             "type": "bool"
-          },
-          {
-            "internalType": "address[]",
-            "name": "bracketOwners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "winners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "internalWinners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "payout",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "tournamentAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "teamCount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "gameCount",
-            "type": "uint256"
           },
           {
             "internalType": "uint256",
@@ -92,6 +52,11 @@
             "internalType": "address",
             "name": "factory",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
           }
         ],
         "internalType": "struct BookieInfo",
@@ -104,16 +69,16 @@
   },
   {
     "inputs": [],
-    "name": "cancelBookie",
+    "name": "cancelBet",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "cancelBracket",
+    "name": "cancelBookie",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -150,14 +115,20 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "getBet",
+    "outputs": [
+      {
         "internalType": "uint256[]",
-        "name": "bracket",
+        "name": "",
         "type": "uint256[]"
       }
     ],
-    "name": "createBracket",
-    "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -172,14 +143,9 @@
             "type": "string"
           },
           {
-            "internalType": "uint256",
-            "name": "buyInPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "pool",
-            "type": "uint256"
+            "internalType": "bytes32",
+            "name": "requestID",
+            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -193,48 +159,13 @@
           },
           {
             "internalType": "bool",
-            "name": "hasEnded",
+            "name": "hasSettled",
             "type": "bool"
           },
           {
             "internalType": "bool",
             "name": "isCanceled",
             "type": "bool"
-          },
-          {
-            "internalType": "address[]",
-            "name": "bracketOwners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "winners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "internalWinners",
-            "type": "address[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "payout",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "tournamentAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "teamCount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "gameCount",
-            "type": "uint256"
           },
           {
             "internalType": "uint256",
@@ -255,30 +186,16 @@
             "internalType": "address",
             "name": "factory",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
           }
         ],
         "internalType": "struct BookieInfo",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
-      }
-    ],
-    "name": "getBracket",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -295,6 +212,13 @@
     "name": "performUpkeep",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "placeBet",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {

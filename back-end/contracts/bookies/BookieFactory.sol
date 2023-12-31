@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.11;
 
-import "./IBookie.sol";
-import "./Bookie.sol";
+import "./ITournamentBookie.sol";
+import "./TournamentBookie.sol";
 import "./BookiesLibrary.sol";
 
 contract BookieFactory {
@@ -29,8 +29,8 @@ contract BookieFactory {
 
         require(i_link.transferFrom(msg.sender, address(this), registryFundingAmount), "Usage: Could not transfer link");
 
-        BookieInfo memory bookieInfo = BookieInfo(name, buyInPrice, 0, 0, false, false, false, new address[](0), new address[](0), new address[](0), 0, address(tournament), 0, 0, 0, address(i_registry), msg.sender, address(this));
-        Bookie bookie = new Bookie(bookieInfo);
+        TournamentBookieInfo memory bookieInfo = TournamentBookieInfo(name, buyInPrice, 0, 0, false, false, false, new address[](0), new address[](0), new address[](0), 0, address(tournament), 0, 0, 0, address(i_registry), msg.sender, address(this));
+        TournamentBookie bookie = new TournamentBookie(bookieInfo);
 
         // Setup chainlink upkeep
 

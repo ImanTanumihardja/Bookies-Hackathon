@@ -1,5 +1,93 @@
 [
   {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "eventId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasSettled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCanceled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "result",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "teamNames",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "gameDates",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "numRounds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "numGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upkeepId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "factory",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "requestFactoryAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "registryAddress",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct TournamentInfo",
+        "name": "tournamentInfo",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "inputs": [],
     "name": "cancelTournament",
     "outputs": [],
@@ -185,6 +273,19 @@
       }
     ],
     "name": "requestSettled",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "upkeepId",
+        "type": "uint256"
+      }
+    ],
+    "name": "setUpkeepId",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

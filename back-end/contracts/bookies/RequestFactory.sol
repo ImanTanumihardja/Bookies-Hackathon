@@ -7,8 +7,10 @@ import "@uma/core/contracts/optimistic-oracle-v2/interfaces/OptimisticOracleV2In
 
 struct DataRequest{
     uint256 eventID;
+    uint256 eventDate;
     bytes ancillaryData;
     int256 price;
+    bool hasSettled;
     address callbackAddress;
 }
 
@@ -23,11 +25,10 @@ contract RequestFactory
     uint64 public immutable livenessTime;
     address public immutable collateralCurrency;
     bytes32 public immutable priceIdentifier;
-    mapping(bytes32 => DataRequest) public dataRequests;
-    bytes32[] public requestIDs;
 
     /*  Private Variables    */
-
+    mapping(bytes32 => DataRequest) private dataRequests;
+    bytes32[] private requestIDs;
 
     constructor(address oracleAddress, uint256 _proposerReward, uint256 _proposerBond, uint64 _livenessTime, address _collateralCurrency, bytes32 _priceIdentifier)
     {
@@ -72,7 +73,7 @@ contract RequestFactory
      * @notice Request a price in the optimistic oracle for a given request timestamp and ancillary data combo. Set the bonds
      * accordingly to the deployer's parameters. Will revert if re-requesting for a previously requested combo.
      */
-    function requestData(uint256 eventID, bytes memory ancillaryData) external returns (bytes32 requestID){
+    function requestData(uint256 eventID, uint256 eventDate, bytes memory ancillaryData) external returns (bytes32 requestID){
         uint256 requestTimestamp = block.timestamp; // Set the request timestamp to the current block timestamp.
 
         IERC20(collateralCurrency).approve(address(oo), proposerReward);
@@ -105,11 +106,21 @@ contract RequestFactory
         requestID = keccak256(abi.encodePacked(priceIdentifier, requestTimestamp, ancillaryData));
         
         requestIDs.push(requestID);
-        dataRequests[requestID] = DataRequest(eventID, ancillaryData, -1, msg.sender);
+        dataRequests[requestID] = DataRequest(eventID, eventDate, ancillaryData, -1, false, msg.sender);
 
         emit NewRequest(requestID);
 
         return requestID;
+    }
+
+    function getRequestIDs() external view returns(bytes32[] memory)
+    {
+        return requestIDs;
+    }
+
+    function getDataRequest(bytes32 requestID) external view returns(DataRequest memory)
+    {
+        return dataRequests[requestID];
     }
 
 }
